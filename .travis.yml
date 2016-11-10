@@ -5,6 +5,7 @@ install:
   - pip install numpy
   - pip install theano
   - pip install h5py
+  - pip install yaml
 
 script:
   - python -m unittest tests/test_generative.py
