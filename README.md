@@ -1,8 +1,4 @@
 # super-engine
 
-testbranch
+[![Build Status](https://travis-ci.org/pipehappy1/super-engine.svg?branch=master)](https://travis-ci.org/pipehappy1/super-engine)))]]
 
-Something new
-
-rain zhang
-test
