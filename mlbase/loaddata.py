@@ -2,6 +2,9 @@ import os
 import numpy as np
 import pickle
 import h5py
+from scipy import misc
+import tarfile
+import scipy.io
 
 def load_mnist():
     f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
@@ -38,3 +41,64 @@ def load_cifar10(batch):
     teY[np.arange(len(labels)), labels] = 1
 
     return data, teY
+
+def get_ILSVRC_images(dataset='train'):
+    """
+    To load the image into numpy array,
+    from scipy import misc
+    misc.imread(second_item_in_returned_tuple)
+    """
+    fp = {'train':'/hdd/home/largedata/ILSVRC/ILSVRC2012_img_train.tar',
+          'valid':'/hdd/home/largedata/ILSVRC/ILSVRC2012_img_val.tar',
+          'test':'/hdd/home/largedata/ILSVRC/ILSVRC2012_img_test.tar'}
+
+    metafp = '/hdd/home/largedata/ILSVRC/ILSVRC2012_devkit_t12/data/meta.mat'
+    meta = scipy.io.loadmat(metafp)
+    wnid2ilsvrc2012 = {}
+    for item in meta['synsets']:
+        wnid2ilsvrc2012[item[0][1][0]] = item[0][0][0][0]
+
+    if dataset == 'train':
+        f = tarfile.open(fp[dataset])
+        ntarfiles = f.getmembers()
+        
+        for ntar in ntarfiles:
+            ntar = f.extractfile(ntar)
+            ntarfh = tarfile.open(fileobj=ntar)
+            images = ntarfh.getmembers()
+            for img in images:
+                (part1, _) = img.name.split('_')
+                yield (img.name, ntarfh.extractfile(img), wnid2ilsvrc2012[part1])
+
+    elif dataset == 'valid':
+        validtruefp = '/hdd/home/largedata/ILSVRC/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
+        validlabel = []
+        with open(validtruefp, 'r') as validfh:
+            for line in validfh:
+                line = line.strip()
+                validlabel.append(int(line))
+        
+        f = tarfile.open(fp[dataset])
+        ntarfiles = f.getmembers()
+        counter = 0
+        for img in ntarfiles:
+            yield(img.name, f.extractfile(img), validlabel[counter])
+            counter += 1
+
+    elif dataset == 'test':
+        pass
+
+    
+
+def load_timofte():
+    timofteBaseDir = '/hdd/home/largedata/timofte/'
+    training = os.path.join(timofteBaseDir, 'training')
+    set5 = os.path.join(timofteBaseDir, 'set5')
+    set14 = os.path.join(timofteBaseDir, 'set14')
+
+    trains = os.listdir(training)
+    trainingData = np.empty((len(trains), 3))
+    for imgn in trains:
+        imgf = os.path.join(training, imgn)
+        img = misc.imread(imgf)
+        img = np.rollaxis(img, 2)
