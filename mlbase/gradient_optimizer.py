@@ -62,3 +62,50 @@ class Adam(GradientOptimizer):
             updates.append((p, p - (self.lr / T.sqrt(vt + self.epsilon)) * mt))
         
         return updates
+        
+class Momentum(GradientOptimizer):
+    def __init__(self, lr=0.01, mu=0.5):
+        super(Nesterov, self).__self__(lr)
+        self.mu = mu
+        
+    def __call__(self, cost, params):
+        grads = T.grad(cost=cost ,wrt=params)
+        updates = []
+        for p, g in zip(params, grads):
+            v = theano.shared(p.get_value() * 0.)
+            new_v = self.mu * v + self.lr * g
+            updates.append((v, new_v))
+            updates.append((p, p - new_v))
+            
+        return updates
+
+class Nesterov(GradientOptimizer):
+    def __init__(self, lr=0.01, mu=0.5):
+        super(Nesterov, self).__self__(lr)
+        self.mu = mu
+        
+    def __call__(self, cost, params):
+        grads = T.grad(cost=cost ,wrt=params)
+        updates = []
+        for p, g in zip(params, grads):
+            v = theano.shared(p.get_value() * 0.)
+            new_v = self.mu * v + self.lr * theano.clone(g, replace = {p: p - self.mu * v})
+            updates.append((v, new_v))
+            updates.append((p, p - new_v))
+            
+        return updates
+        
+class Adagrad(GradientOptimizer):
+    def __init__(self, lr=0.01, epsilon=1e-7):
+        super(Nesterov, self).__self__(lr)
+        self.epsilon = epsilon
+        
+    def __call__(self, cost, params):
+        grads = T.grad(cost=cost ,wrt=params)
+        updates = []
+        for p, g in zip(params, grads):
+            Gt = theano.shared(p.get_value() * 0.)
+            updates.append((Gt, Gt + g*g))
+            updates.append((p, p - (self.lr / T.sqrt(Gt + self.epsilon)) * g))
+            
+        return updates
