@@ -2,6 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 import theano.tensor.nnet as nnet
+from theano.tensor.signal.pool import pool_2d
 import datetime
 import yaml
 import os
@@ -287,7 +288,7 @@ class Conv2d(Layer):
         
     def forwardSize(self, inputsize):
         # [size1, size2, size3], size: (32,1,28,28)
-        print("conv2d.size: {}, {}, {}".format(inputsize,self.mapMulti, self.inputFeature))
+        # print("conv2d.size: {}, {}, {}".format(inputsize,self.mapMulti, self.inputFeature))
         isize = inputsize[0]
 
         if len(isize) != 4:
@@ -367,7 +368,7 @@ class Pooling(Layer):
 
     def forward(self, inputtensor):
         inputactivation = inputtensor[0]
-        return (T.signal.pool.pool_2d(inputactivation, self.size, ignore_border=True),)
+        return (pool_2d(inputactivation, self.size, ignore_border=True),)
 
     def forwardSize(self, inputsize):
         isize = inputsize[0]
