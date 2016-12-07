@@ -287,7 +287,7 @@ class Conv2d(Layer):
         
     def forwardSize(self, inputsize):
         # [size1, size2, size3], size: (32,1,28,28)
-        print("conv2d.size: {}, {}, {}".format(inputsize,self.mapMulti, self.inputFeature))
+        # print("conv2d.size: {}, {}, {}".format(inputsize,self.mapMulti, self.inputFeature))
         isize = inputsize[0]
 
         if len(isize) != 4:
