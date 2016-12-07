@@ -23,23 +23,28 @@ class TestConv2d(unittest.TestCase):
         self.assertEqual(y, [(100, 20, 28, 28)])
     
     def test_conv2d_forward(self):
-        #conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
-        x = theano.shared(x,borrow = True)
-        initweight = floatX(np.random.randn(20, 1, *(3,3)) * 0.01)
-        w = theano.shared(initweight, borrow=True)
-        #y = conv2d.forward(x)
-        y = T.nnet.conv2d(x, w, border_mode='half', subsample=(1,1))
-        #y_shape = y.get_value(borrow=True).shape
-        y_shape = y.eval().shape
+        w = floatX(np.random.randn(20, 1, *(3,3)) * 0.01)
+
+        input_x = T.tensor4()
+        input_w = T.tensor4()
+        y = T.nnet.conv2d(input_x, input_w, border_mode='half', subsample=(1,1))
+
+        f = theano.function(inputs=[input_x,input_w],outputs=y, allow_input_downcast=True)
+        y_shape = f(x, w).shape
         self.assertEqual(y_shape, (500, 20, 28, 28))
         
     def test_conv2d_forward2(self):
         conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
         size = conv2d.forwardSize([(500, 1 ,28, 28)])
-        y = conv2d.forward([x])
-        y_shape = y[0].eval().shape
+
+        input_x = T.tensor4()
+        y = conv2d.forward([input_x,])[0]
+
+        f = theano.function(inputs=[input_x], outputs=y, allow_input_downcast=True)
+        
+        y_shape = f(x).shape
         self.assertEqual(y_shape, (500, 20, 28, 28))
 
 class TestPooling(unittest.TestCase):
