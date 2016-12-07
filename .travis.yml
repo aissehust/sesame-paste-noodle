@@ -7,7 +7,7 @@ before_install:
 
 install:
   - pip install numpy
-  - pip install theano
+  - pip install git+https://github.com/Theano/Theano.git#egg=Theano
   - pip install h5py
   - pip install pyyaml
 
