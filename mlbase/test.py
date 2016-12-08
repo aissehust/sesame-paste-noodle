@@ -2,11 +2,37 @@ import mlbase.networkhelper as N
 import h5py
 import numpy as np
 import activation as act
+import mlbase.loaddata as l
 
 def testload():
     n = N.Network()
     n.loadFromFile()
     n.saveToFile('testmodel')
+
+def test_maxout():
+    network = N.Network()
+
+    network.setInput(N.RawInput((1, 28,28)))
+    network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=128))
+    network.append(N.FeaturePooling(4))
+    network.append(N.Pooling((2,2)))
+    network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=8))
+    network.append(N.FeaturePooling(4))
+    network.append(N.Pooling((2,2)))
+    network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=8))
+    network.append(N.FeaturePooling(4))
+    network.append(N.GlobalPooling())
+    network.append(N.FullConn(input_feature=128, output_feature=10))
+    network.append(N.SoftMax())
+
+    network.build()
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
 
 def test_globalpooling():
     network = N.Network()
@@ -327,6 +353,5 @@ def test1():
         print(1 - np.mean(np.argmax(teY, axis=1) == network.predict(teX)))
 
 if __name__ == "__main__":
-    test_globalpooling()
-    #testbn()
-    #testload()
+    test_maxout()
+

@@ -446,6 +446,73 @@ class GlobalPooling(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+class FeaturePooling(Layer):
+    """
+    For maxout
+    """
+    def __init__(self, pool_size, axis=1, pool_function=theano.tensor.max):
+        super(FeaturePooling, self).__init__()
+
+        self.poolSize = pool_size
+        self.axis = axis
+        self.poolFunc = pool_function
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        x = inputtensor[0]
+
+        inputShape = tuple(x.shape)
+        poolShape = inputShape[:self.axis] + (inputShape[self.axis] // self.poolSize, self.poolSize) + inputShape[self.axis+1:]
+        
+        interData =T.reshape(x, poolShape)
+        
+        return [self.poolFunc(interData, axis=self.axis+1),]
+
+    def forwardSize(self, inputsize):
+        isize = list(inputsize[0])
+
+        if len(isize) != 4:
+            raise IndexError
+
+        if isize[self.axis] % self.poolSize != 0:
+            raise ValueError("input number of features is not multiple of the pool size.")
+
+        outputSize = isize[:self.axis]
+        outputSize += [isize[self.axis] // self.poolSize,]
+        outputSize += isize[self.axis+1:]
+
+        return [outputSize,]
+
+    def fillToObjMap(self):
+        objDict = super(FeaturePooling, self).fillToObjMap()
+        objDict['poolSize'] = self.poolSize
+        objDict['axis'] = self.axis
+        objDict['poolFunc'] = 'max'
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(FeaturePooling, self).loadFromObjMap(tmap)
+        self.poolSize = objDict['poolSize']
+        self.axis = objDict['axis']
+        self.poolFunc = theano.tensor.max
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(FeaturePooling.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = FeaturePooling(obj_dict['poolSize'])
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+
 class UpPooling(Layer):
     """
     This can be done as gradient/backward of pooling:
