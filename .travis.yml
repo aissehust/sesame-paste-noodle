@@ -14,4 +14,5 @@ install:
 script:
   - python -m unittest tests/test_generative.py
   - python -m unittest tests/test_networkhelper.py
+  - python -m unittest tests/test_sgd_opt.py
 
