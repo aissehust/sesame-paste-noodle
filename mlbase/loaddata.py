@@ -21,7 +21,11 @@ def load_mnist():
 
 def load_cifar10(batch):
     fp = '/hdd/home/largedata/CIFAR10/cifar-10-batches-py/'
-    fp = os.path.join(fp, 'data_batch_'+str(batch))
+    if batch == 'test':
+        fp = os.path.join(fp, 'test_batch')
+    else:
+        fp = os.path.join(fp, 'data_batch_'+str(batch))
+    
 
     # The following is taken from keras
     f = open(fp, 'rb')
