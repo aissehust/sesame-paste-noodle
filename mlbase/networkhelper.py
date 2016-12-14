@@ -10,10 +10,7 @@ import mlbase.cost as cost
 import mlbase.learner as learner
 import mlbase.gradient_optimizer as opt
 import mlbase.regularization as reg
-
-
-def floatX(X):
-    return np.asarray(X, dtype=theano.config.floatX)
+from mlbase.util import floatX
 
 
 class Layer(yaml.YAMLObject):
@@ -302,7 +299,7 @@ class Conv2d(Layer):
 
         initweight = floatX(np.random.randn(self.outputFeature,
                                             self.inputFeature,
-                                            *self.filterSize) * 0.01)
+                                            *self.filterSize) * 0.1)
         self.w = theano.shared(initweight, borrow=True)
 
         retSize = None
