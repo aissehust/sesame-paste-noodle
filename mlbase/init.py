@@ -22,4 +22,4 @@ class XavierInit(WeightInitializer):
             return floatX(np.random.randn(*shape) * coeff)
         else:
             raise NotImplementedError("Unknown shape")
-            
+
