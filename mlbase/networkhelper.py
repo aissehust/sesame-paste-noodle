@@ -10,10 +10,8 @@ import mlbase.cost as cost
 import mlbase.learner as learner
 import mlbase.gradient_optimizer as opt
 import mlbase.regularization as reg
-
-
-def floatX(X):
-    return np.asarray(X, dtype=theano.config.floatX)
+from mlbase.util import floatX
+import mlbase.init as winit
 
 
 class Layer(yaml.YAMLObject):
@@ -300,9 +298,10 @@ class Conv2d(Layer):
             self.inputFeature = isize[1]
             self.outputFeature = int(self.inputFeature*self.mapMulti)
 
-        initweight = floatX(np.random.randn(self.outputFeature,
-                                            self.inputFeature,
-                                            *self.filterSize) * 0.01)
+        weightIniter = winit.XavierInit()
+        initweight = weightIniter.initialize((self.outputFeature,
+                                              self.inputFeature,
+                                              *self.filterSize))
         self.w = theano.shared(initweight, borrow=True)
 
         retSize = None
@@ -595,7 +594,8 @@ class FullConn(Layer):
         if output is not None:
             self.output = output
 
-        initweight = floatX(np.random.randn(input_feature, output_feature,) * 0.01)
+        weightIniter = winit.XavierInit()
+        initweight = weightIniter.initialize((input_feature, output_feature))
         self.w = theano.shared(initweight, borrow=True)
 
         self.inputFeature = input_feature
