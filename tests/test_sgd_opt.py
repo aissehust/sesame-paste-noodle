@@ -11,6 +11,7 @@ b = theano.shared(1.0)
 x = T.dscalar('x')
 y = T.dscalar('y')
 cost = (x+b-y)**2
+acceptThreshold = 0.5
 
 class TestRMSprop(unittest.TestCase):
     
@@ -23,7 +24,7 @@ class TestRMSprop(unittest.TestCase):
                                allow_input_downcast=True)
         for i in range(500):
             func(data[i],lable[i])
-        self.assertTrue(func(1,1 ) < 0.1)
+        self.assertTrue(func(1,1 ) < acceptThreshold)
 
 class TestAdam(unittest.TestCase):
     def test_Adam(self):       
@@ -35,7 +36,7 @@ class TestAdam(unittest.TestCase):
                                allow_input_downcast=True)
         for i in range(500):
             func(data[i],lable[i])
-        self.assertTrue(func(1,1 ) < 0.1)
+        self.assertTrue(func(1,1 ) < acceptThreshold)
     
 class TestMomentum(unittest.TestCase):
     def test_Momentum(self):
@@ -47,7 +48,7 @@ class TestMomentum(unittest.TestCase):
                                allow_input_downcast=True)
         for i in range(500):
             func(data[i],lable[i])
-        self.assertTrue(func(1,1 ) < 0.1)
+        self.assertTrue(func(1,1 ) < acceptThreshold)
 
 class TestNesterov(unittest.TestCase):
     def test_Nesterov(self):
@@ -59,7 +60,7 @@ class TestNesterov(unittest.TestCase):
                                allow_input_downcast=True)
         for i in range(500):
             func(data[i],lable[i])
-        self.assertTrue(func(1,1 ) < 0.1)
+        self.assertTrue(func(1,1 ) < acceptThreshold)
     
 class TestAdagrad(unittest.TestCase):
     def test_Adagrad(self):
@@ -71,8 +72,7 @@ class TestAdagrad(unittest.TestCase):
                                allow_input_downcast=True)
         for i in range(500):
             func(data[i],lable[i])
-            print(b.get_value())
-        self.assertTrue(func(1,1 ) < 0.1)
+        self.assertTrue(func(1,1 ) < acceptThreshold)
     
 if __name__ == '__main__':
     #unittest.main(verbosity=2)

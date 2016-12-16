@@ -2,10 +2,19 @@ language: python
 python:
   - '3.5'
 
+env:
+  global:
+    - CXX=g++-4.8
+    - THEANO_FLAGS=cxx=/usr/bin/g++-4.8
+
 before_install:
-  - sudo apt-get install -qq libblas-dev
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq g++-4.8 -y
+  - sudo apt-get install -qq libblas-dev -y
 
 install:
+  - /usr/bin/g++ --version
   - pip install numpy
   - pip install git+https://github.com/Theano/Theano.git#egg=Theano
   - pip install h5py
@@ -15,4 +24,3 @@ script:
   - python -m unittest tests/test_generative.py
   - python -m unittest tests/test_networkhelper.py
   - python -m unittest tests/test_sgd_opt.py
-

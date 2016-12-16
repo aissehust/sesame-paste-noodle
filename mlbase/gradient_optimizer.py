@@ -59,7 +59,7 @@ class Adam(GradientOptimizer):
             updates.append((exp, exp+1))
             updates.append((m, m_new))
             updates.append((v, v_new))
-            updates.append((p, p - (self.lr / T.sqrt(vt + self.epsilon)) * mt))
+            updates.append((p, p - self.lr * mt / (T.sqrt(vt) + self.epsilon)))
         
         return updates
         
@@ -104,8 +104,9 @@ class Adagrad(GradientOptimizer):
         grads = T.grad(cost=cost ,wrt=params)
         updates = []
         for p, g in zip(params, grads):
-            Gt = theano.shared(p.get_value() * 0.)
-            updates.append((Gt, Gt + g*g))
-            updates.append((p, p - (self.lr / T.sqrt(Gt + self.epsilon)) * g))
+            acc = theano.shared(p.get_value() * 0.)
+            acc_new = acc + g**2
+            updates.append((acc, acc_new))
+            updates.append((p, p - self.lr * g / T.sqrt(acc_new + self.epsilon)))
             
         return updates
