@@ -65,7 +65,7 @@ class Adam(GradientOptimizer):
         
 class Momentum(GradientOptimizer):
     def __init__(self, lr=0.01, mu=0.5):
-        super(Nesterov, self).__self__(lr)
+        super(Momentum, self).__init__(lr)
         self.mu = mu
         
     def __call__(self, cost, params):
@@ -81,7 +81,7 @@ class Momentum(GradientOptimizer):
 
 class Nesterov(GradientOptimizer):
     def __init__(self, lr=0.01, mu=0.5):
-        super(Nesterov, self).__self__(lr)
+        super(Nesterov, self).__init__(lr)
         self.mu = mu
         
     def __call__(self, cost, params):
@@ -97,7 +97,7 @@ class Nesterov(GradientOptimizer):
         
 class Adagrad(GradientOptimizer):
     def __init__(self, lr=0.01, epsilon=1e-7):
-        super(Nesterov, self).__self__(lr)
+        super(Adagrad, self).__init__(lr)
         self.epsilon = epsilon
         
     def __call__(self, cost, params):
