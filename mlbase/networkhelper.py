@@ -843,8 +843,8 @@ class Network(learner.SupervisedLearner):
         self.modelSavePrefix = i
 
     @property
-    def batchSize(self, ssize):
-        return self.batchSize
+    def batchSize(self):
+        return self.batchsize
     @batchSize.setter
     def batchSize(self, ssize):
         self.batchsize = ssize
@@ -995,7 +995,26 @@ class Network(learner.SupervisedLearner):
                 self.updateLatestLink()
 
     def predict(self, X):
-        return self.predicter(X)
+        startIndex = 0
+        retY = None
+        endFlag = False
+        while 1:
+            endIndex = startIndex + self.batchSize
+            if endIndex > len(X):
+                endIndex = len(X)
+                endFlag = True
+
+            batchY = self.predicter(X[startIndex:endIndex])
+            if retY is None:
+                otherDim = batchY.shape[1:]
+                retY = np.empty([len(X), *otherDim])
+            retY[startIndex:endIndex,:] = batchY
+
+            if endFlag:
+                break
+            startIndex += self.batchSize
+
+        return retY
 
     # The following stuff are for saving and loading
     def getSaveModelName(self, dateTime=None):
