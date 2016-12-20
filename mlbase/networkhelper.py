@@ -788,6 +788,7 @@ class BatchNormalization(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+# the class Dropout refers https://github.com/Lasagne/Lasagne/blob/master/lasagne/layers/noise.py
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 class Dropout(Layer):
 
@@ -847,8 +848,8 @@ class Dropout(Layer):
 
     def loadFromObjMap(self, tmap):
         super(Dropout, self).loadFromObjMap(tmap)
-        self.inputFeature = tmap['probability']
-        self.outputFeature = tmap['rescale']
+        self.p = tmap['probability']
+        self.rescale = tmap['rescale']
 
     @classmethod
     def to_yaml(cls, dumper, data):
@@ -859,8 +860,8 @@ class Dropout(Layer):
     @classmethod
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
-        ret = Dropout(input_feature=obj_dict['probability'],
-                       output_feature=obj_dict['rescale'])
+        ret = Dropout(p=obj_dict['probability'],
+                      rescale=obj_dict['rescale'])
         ret.loadFromObjMap(obj_dict)
         return ret
 
