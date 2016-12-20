@@ -796,19 +796,20 @@ class Dropout(Layer):
     LayerTypeName = 'dropout'
     yaml_tag = u'!dropout'
     
-    def __init__(self, p=0.5, rescale=True, shared_axes=()):
+    def __init__(self, p=0.5, rescale=True, shared_axes=(), deterministic=False):
         super(Dropout, self).__init__()
         self._srng = RandomStreams(np.random.randint(1, 2147462579))
         self.p = p
         self.rescale = rescale
         self.shared_axes = tuple(shared_axes)
+        self.deterministic = deterministic
 
     def getpara(self):
         return []
         
-    def forward(self, inputtensor, deterministic=False):
+    def forward(self, inputtensor):
         
-        if deterministic or self.p == 0:
+        if self.deterministic or self.p == 0:
             return inputtensor
 
         else:
