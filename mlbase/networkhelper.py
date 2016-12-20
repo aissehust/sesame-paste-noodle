@@ -835,7 +835,11 @@ class Dropout(Layer):
                 mask = T.patternbroadcast(mask, bcast)
             x = x * mask
             return (x, )
+    
+    def predictForward(self, inputtensor):
         
+        return inputtensor
+    
     def forwardSize(self, inputsize):
         return inputsize
     
