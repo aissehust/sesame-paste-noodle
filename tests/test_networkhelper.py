@@ -149,6 +149,28 @@ class TestBatchNormalization(unittest.TestCase):
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10, 28, 28))
           
+class TestDropout(unittest.TestCase):
+    
+    def test_Dropout_forwardSize(self):
+        x = [(500, 20, 28, 28)]
+        d = N.Dropout()
+        y = d.forwardSize(x)
+        self.assertEqual(y, [(500, 20, 28, 28)])
+        
+    def test_Dropout_forward(self):
+        x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10, 28, 28)))
+        x = theano.shared(x,borrow = True)
+        d = N.Dropout()
+        y = d.forward([x])
+        y_shape = y[0].eval().shape
+        pixel_number = y_shape[0]*y_shape[1]*y_shape[2]*y_shape[3]
+        new_y = y[0].eval().reshape(pixel_number)
+        counter = 0
+        for x in range(pixel_number):
+            if abs(new_y[x]) == 0:
+                counter=counter+1
+        self.assertEqual(round(counter/pixel_number,1), d.p)
+         
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     suite1 = unittest.TestLoader().loadTestsFromTestCase(TestConv2d)
@@ -158,6 +180,7 @@ if __name__ == '__main__':
     suite5 = unittest.TestLoader().loadTestsFromTestCase(TestFullConn)
     suite6 = unittest.TestLoader().loadTestsFromTestCase(TestSoftmax)
     suite7 = unittest.TestLoader().loadTestsFromTestCase(TestBatchNormalization)
+    suite8 = unittest.TestLoader().loadTestsFromTestCase(TestDropout)
     
-    allTest = unittest.TestSuite([suite1, suite2, suite3, suite4, suite5, suite6, suite7])
+    allTest = unittest.TestSuite([suite1, suite2, suite3, suite4, suite5, suite6, suite7, suite8])
     unittest.TextTestRunner(verbosity=2).run(allTest)
