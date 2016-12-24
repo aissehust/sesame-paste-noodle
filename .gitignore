@@ -44,3 +44,4 @@ script/python/__pycache__/
 3rdparty/Csdp-6.1.1/theta/rand_graph
 3rdparty/Csdp-6.1.1/theta/theta
 script/python/theano-example/mnist
+TheFramework.egg-info/
