@@ -4,6 +4,8 @@ from setuptools import setup
 install_requires = [
     'numpy',
     'theano',
+    'pyyaml',
+    'h5py',
 ]
 
 setup(
