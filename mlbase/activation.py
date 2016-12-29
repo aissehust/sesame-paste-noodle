@@ -233,22 +233,24 @@ class Sine2(NonLinear):
         return (T.sin(self.a*inputimage),)
 
     def fillToObjMap(self):
-        objDict = super(Sine, self).fillToObjMap()
+        objDict = super(Sine2, self).fillToObjMap()
+        objDict['a'] = self.a
         return objDict
 
     def loadFromObjMap(self, tmap):
-        super(Sine, self).loadFromObjMap(tmap)
+        super(Sine2, self).loadFromObjMap(tmap)
+        self.a = tmap['a']
 
     @classmethod
     def to_yaml(cls, dumper, data):
         obj_dict = data.fillToObjMap()
-        node = dumper.represent_mapping(Sine.yaml_tag, obj_dict)
+        node = dumper.represent_mapping(Sine2.yaml_tag, obj_dict)
         return node
 
     @classmethod
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
-        ret = Sine()
+        ret = Sine2()
         ret.loadFromObjMap(obj_dict)
         return ret
 
@@ -269,22 +271,24 @@ class Cosine2(NonLinear):
         return (T.cos(self.a*inputimage),)
 
     def fillToObjMap(self):
-        objDict = super(Cosine, self).fillToObjMap()
+        objDict = super(Cosine2, self).fillToObjMap()
+        objDict['a'] = self.a
         return objDict
 
     def loadFromObjMap(self, tmap):
-        super(Cosine, self).loadFromObjMap(tmap)
+        super(Cosine2, self).loadFromObjMap(tmap)
+        self.a = tmap['a']
 
     @classmethod
     def to_yaml(cls, dumper, data):
         obj_dict = data.fillToObjMap()
-        node = dumper.represent_mapping(Cosine.yaml_tag, obj_dict)
+        node = dumper.represent_mapping(Cosine2.yaml_tag, obj_dict)
         return node
 
     @classmethod
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
-        ret = Cosine()
+        ret = Cosine2()
         ret.loadFromObjMap(obj_dict)
         return ret
 
@@ -321,22 +325,24 @@ class Sine3(NonLinear):
             raise IndexError
 
     def fillToObjMap(self):
-        objDict = super(Sine, self).fillToObjMap()
+        objDict = super(Sine3, self).fillToObjMap()
+        objDict['a'] = self.a
         return objDict
 
     def loadFromObjMap(self, tmap):
-        super(Sine, self).loadFromObjMap(tmap)
+        super(Sine3, self).loadFromObjMap(tmap)
+        self.a = tmap['a']
 
     @classmethod
     def to_yaml(cls, dumper, data):
         obj_dict = data.fillToObjMap()
-        node = dumper.represent_mapping(Sine.yaml_tag, obj_dict)
+        node = dumper.represent_mapping(Sine3.yaml_tag, obj_dict)
         return node
 
     @classmethod
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
-        ret = Sine()
+        ret = Sine3()
         ret.loadFromObjMap(obj_dict)
         return ret
 
@@ -372,21 +378,23 @@ class Cosine3(NonLinear):
             raise IndexError
 
     def fillToObjMap(self):
-        objDict = super(Cosine, self).fillToObjMap()
+        objDict = super(Cosine3, self).fillToObjMap()
+        objDict['a'] = self.a
         return objDict
 
     def loadFromObjMap(self, tmap):
-        super(Cosine, self).loadFromObjMap(tmap)
+        super(Cosine3, self).loadFromObjMap(tmap)
+        self.a = tmap['a']
 
     @classmethod
     def to_yaml(cls, dumper, data):
         obj_dict = data.fillToObjMap()
-        node = dumper.represent_mapping(Cosine.yaml_tag, obj_dict)
+        node = dumper.represent_mapping(Cosine3.yaml_tag, obj_dict)
         return node
 
     @classmethod
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
-        ret = Cosine()
+        ret = Cosine3()
         ret.loadFromObjMap(obj_dict)
         return ret
