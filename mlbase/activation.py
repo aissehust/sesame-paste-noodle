@@ -1,6 +1,7 @@
 import theano
 import theano.tensor as T
 import mlbase.networkhelper as N
+import numpy as np
 
 class NonLinear(N.Layer):
     LayerTypeName = 'NonLinear'
@@ -211,5 +212,181 @@ class Triangle(NonLinear):
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
         ret = Triangle()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+# every layer has a different 'a' that can be learned
+class Sine2(NonLinear):
+    debugname = 'sine'
+    LayerTypeName = 'Sine'
+    yaml_tag = u'!Sine'
+
+    def __init__(self):
+        super(Sine, self).__init__()
+        self.a = theano.shared(1.0)
+    
+    def getpara(self):
+        return [self.a]
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        return (T.sin(self.a*inputimage),)
+
+    def fillToObjMap(self):
+        objDict = super(Sine, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Sine, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Sine.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Sine()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+class Cosine2(NonLinear):
+    debugname = 'cos'
+    LayerTypeName = 'Cosine'
+    yaml_tag = u'!Cosine'
+
+    def __init__(self):
+        super(Cosine, self).__init__()
+        self.a = theano.shared(1.0)
+    
+    def getpara(self):
+        return [self.a]
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        return (T.cos(self.a*inputimage),)
+
+    def fillToObjMap(self):
+        objDict = super(Cosine, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Cosine, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Cosine.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Cosine()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+# every feature map has a different 'a' that can be learned
+class Sine3(NonLinear):
+    debugname = 'sine'
+    LayerTypeName = 'Sine'
+    yaml_tag = u'!Sine'
+
+    def __init__(self):
+        super(Sine, self).__init__()
+    
+    def getpara(self):
+        return [self.a]
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        if len(inputimage.ndim) == 4:
+            return (T.cos(self.a.dimshuffle('x', 0, 'x', 'x')*inputimage),)
+        if len(inputimage.ndim) == 2:
+            return (T.cos(self.a*inputimage),)
+        else:
+            raise NotImplementedError
+    
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        ainit = np.zeros((isize[1],))
+        self.a = theano.shared(ainit, borrow=True)
+        if len(isize) == 4:
+            return [(isize[0], isize[1], isize[2], isize[3])]
+        if len(isize) == 2:
+            return [(isize[0], isize[1])]
+        else:
+            raise IndexError
+
+    def fillToObjMap(self):
+        objDict = super(Sine, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Sine, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Sine.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Sine()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+class Cosine3(NonLinear):
+    debugname = 'cos'
+    LayerTypeName = 'Cosine'
+    yaml_tag = u'!Cosine'
+
+    def __init__(self):
+        super(Cosine, self).__init__()
+    
+    def getpara(self):
+        return [self.a]
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        if len(inputimage.ndim) == 4:
+            return (T.cos(self.a.dimshuffle('x', 0, 'x', 'x')*inputimage),)
+        if len(inputimage.ndim) == 2:
+            return (T.cos(self.a*inputimage),)
+        else:
+            raise NotImplementedError
+    
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        ainit = np.zeros((isize[1],))
+        self.a = theano.shared(ainit, borrow=True)
+        if len(isize) == 4:
+            return [(isize[0], isize[1], isize[2], isize[3])]
+        if len(isize) == 2:
+            return [(isize[0], isize[1])]
+        else:
+            raise IndexError
+
+    def fillToObjMap(self):
+        objDict = super(Cosine, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Cosine, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Cosine.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Cosine()
         ret.loadFromObjMap(obj_dict)
         return ret
