@@ -222,7 +222,7 @@ class Sine2(NonLinear):
     yaml_tag = u'!Sine'
 
     def __init__(self):
-        super(Sine, self).__init__()
+        super(Sine2, self).__init__()
         self.a = theano.shared(1.0)
     
     def getpara(self):
@@ -260,7 +260,7 @@ class Cosine2(NonLinear):
     yaml_tag = u'!Cosine'
 
     def __init__(self):
-        super(Cosine, self).__init__()
+        super(Cosine2, self).__init__()
         self.a = theano.shared(1.0)
     
     def getpara(self):
@@ -299,7 +299,7 @@ class Sine3(NonLinear):
     yaml_tag = u'!Sine'
 
     def __init__(self):
-        super(Sine, self).__init__()
+        super(Sine3, self).__init__()
     
     def getpara(self):
         return [self.a]
@@ -352,7 +352,7 @@ class Cosine3(NonLinear):
     yaml_tag = u'!Cosine'
 
     def __init__(self):
-        super(Cosine, self).__init__()
+        super(Cosine3, self).__init__()
     
     def getpara(self):
         return [self.a]
