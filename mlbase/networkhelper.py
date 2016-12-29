@@ -253,7 +253,7 @@ class Conv2d(Layer):
     def __init__(self, filter_size=(3,3),
                  input_feature=None, output_feature=None,
                  feature_map_multiplier=None,
-                 subsample=(1,1), border='half', need_bias=False):
+                 subsample=(1,1), border='half', need_bias=False, dc=0.0):
         """
         This 2d convolution deals with 4d tensor:
         (batch_size, feature map/channel, filter_row, filter_col)
@@ -270,6 +270,7 @@ class Conv2d(Layer):
         self.border = border
         self.subsample = subsample
         self.need_bias = need_bias
+        self.dc = dc
 
         self.w = None
         self.b = None
@@ -280,6 +281,20 @@ class Conv2d(Layer):
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
         #print('conv2d.forward.type: {}'.format(inputimage.ndim))
+        if self.dc == 0.0:
+            pass
+        else:
+            if 0 <self.dc <=1:
+                _srng = RandomStreams(np.random.randint(1, 2147462579))
+                one = T.constant(1)
+                retain_prob = one - self.dc
+                mask_shape = self.w.shape
+                mask = _srng.binomial(mask_shape, p=retain_prob,
+                                           dtype=self.w.dtype)
+                self.w = self.w * mask
+            else:
+                raise IndexError
+               
         l3conv = T.nnet.conv2d(inputimage,
                                self.w,
                                border_mode=self.border,
@@ -332,6 +347,7 @@ class Conv2d(Layer):
         objDict['subsample'] = self.subsample
         objDict['w'] = self.w
         objDict['b'] = self.b
+        objDict['dc'] = self.dc
 
         return objDict
 
@@ -344,6 +360,7 @@ class Conv2d(Layer):
         self.subsample = tmap['subsample']
         self.w = tmap['w']
         self.b = tmap['b']
+        self.dc = tmap['dc']
 
     @classmethod
     def to_yaml(cls, dumper, data):
@@ -591,7 +608,8 @@ class FullConn(Layer):
     LayerTypeName = 'FullConn'
     yaml_tag = u'!FullConn'
     
-    def __init__(self, times=None, output=None, input_feature=None, output_feature=None, need_bias=False):
+    def __init__(self, times=None, output=None, input_feature=None, output_feature=None,
+                 need_bias=False, dc=0.0):
         super(FullConn, self).__init__()
         if times is not None:
             self.times = times
@@ -610,12 +628,28 @@ class FullConn(Layer):
         self.times = -1
         self.output = -1
         self.need_bias = need_bias
+        self.dc = dc
 
     def getpara(self):
         return (self.w, self.b)
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
+        
+        if self.dc == 0.0:
+            pass
+        else:
+            if 0 <self.dc <=1:
+                _srng = RandomStreams(np.random.randint(1, 2147462579))
+                one = T.constant(1)
+                retain_prob = one - self.dc
+                mask_shape = self.w.shape
+                mask = _srng.binomial(mask_shape, p=retain_prob,
+                                           dtype=self.w.dtype)
+                self.w = self.w * mask
+            else:
+                raise IndexError
+        
         if self.need_bias:
             return ((T.dot(inputimage, self.w)+self.b), )
         else:
@@ -643,6 +677,7 @@ class FullConn(Layer):
         objDict['outputFeature'] = self.outputFeature
         objDict['w'] = self.w
         objDict['b'] = self.b
+        objDict['dc'] = self.dc
 
         return objDict
 
@@ -652,6 +687,7 @@ class FullConn(Layer):
         self.outputFeature = tmap['outputFeature']
         self.w = tmap['w']
         self.b = tmap['b']
+        self.dc = tmap['dc']
 
     @classmethod
     def to_yaml(cls, dumper, data):
