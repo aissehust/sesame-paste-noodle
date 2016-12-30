@@ -2,6 +2,7 @@ import theano
 import theano.tensor as T
 import mlbase.networkhelper as N
 import numpy as np
+from mlbase.util import floatX
 
 class NonLinear(N.Layer):
     LayerTypeName = 'NonLinear'
@@ -120,7 +121,7 @@ class Cosine(NonLinear):
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        return (T.cos(inputimage*10),)
+        return (T.cos(inputimage),)
 
     def fillToObjMap(self):
         objDict = super(Cosine, self).fillToObjMap()
@@ -214,23 +215,33 @@ class Triangle(NonLinear):
         ret = Triangle()
         ret.loadFromObjMap(obj_dict)
         return ret
-
+        
 # every layer has a different 'a' that can be learned
 class Sine2(NonLinear):
-    debugname = 'sine'
-    LayerTypeName = 'Sine'
-    yaml_tag = u'!Sine'
+    debugname = 'sine2'
+    LayerTypeName = 'Sine2'
+    yaml_tag = u'!Sine2'
 
     def __init__(self):
         super(Sine2, self).__init__()
-        self.a = theano.shared(1.0)
     
     def getpara(self):
         return [self.a]
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        return (T.sin(self.a*inputimage),)
+        return (T.sin(self.a[0]*inputimage),)
+
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        ainit = floatX(np.ones((1,)))
+        self.a = theano.shared(ainit, borrow=True)
+        if len(isize) == 4:
+            return [(isize[0], isize[1], isize[2], isize[3])]
+        if len(isize) == 2:
+            return [(isize[0], isize[1])]
+        else:
+            raise IndexError
 
     def fillToObjMap(self):
         objDict = super(Sine2, self).fillToObjMap()
@@ -255,20 +266,30 @@ class Sine2(NonLinear):
         return ret
 
 class Cosine2(NonLinear):
-    debugname = 'cos'
-    LayerTypeName = 'Cosine'
-    yaml_tag = u'!Cosine'
+    debugname = 'cos2'
+    LayerTypeName = 'Cosine2'
+    yaml_tag = u'!Cosine2'
 
     def __init__(self):
         super(Cosine2, self).__init__()
-        self.a = theano.shared(1.0)
     
     def getpara(self):
         return [self.a]
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        return (T.cos(self.a*inputimage),)
+        return (T.cos(self.a[0]*inputimage),)
+
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        ainit = floatX(np.ones((1,)))
+        self.a = theano.shared(ainit, borrow=True)
+        if len(isize) == 4:
+            return [(isize[0], isize[1], isize[2], isize[3])]
+        if len(isize) == 2:
+            return [(isize[0], isize[1])]
+        else:
+            raise IndexError
 
     def fillToObjMap(self):
         objDict = super(Cosine2, self).fillToObjMap()
@@ -294,9 +315,9 @@ class Cosine2(NonLinear):
 
 # every feature map has a different 'a' that can be learned
 class Sine3(NonLinear):
-    debugname = 'sine'
-    LayerTypeName = 'Sine'
-    yaml_tag = u'!Sine'
+    debugname = 'sine3'
+    LayerTypeName = 'Sine3'
+    yaml_tag = u'!Sine3'
 
     def __init__(self):
         super(Sine3, self).__init__()
@@ -306,16 +327,16 @@ class Sine3(NonLinear):
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        if len(inputimage.ndim) == 4:
+        if inputimage.ndim == 4:
             return (T.cos(self.a.dimshuffle('x', 0, 'x', 'x')*inputimage),)
-        if len(inputimage.ndim) == 2:
+        if inputimage.ndim == 2:
             return (T.cos(self.a*inputimage),)
         else:
             raise NotImplementedError
-    
+
     def forwardSize(self, inputsize):
         isize = inputsize[0]
-        ainit = np.zeros((isize[1],))
+        ainit = floatX(np.ones((isize[1],)))
         self.a = theano.shared(ainit, borrow=True)
         if len(isize) == 4:
             return [(isize[0], isize[1], isize[2], isize[3])]
@@ -347,9 +368,9 @@ class Sine3(NonLinear):
         return ret
 
 class Cosine3(NonLinear):
-    debugname = 'cos'
-    LayerTypeName = 'Cosine'
-    yaml_tag = u'!Cosine'
+    debugname = 'cos3'
+    LayerTypeName = 'Cosine3'
+    yaml_tag = u'!Cosine3'
 
     def __init__(self):
         super(Cosine3, self).__init__()
@@ -359,16 +380,16 @@ class Cosine3(NonLinear):
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        if len(inputimage.ndim) == 4:
+        if inputimage.ndim == 4:
             return (T.cos(self.a.dimshuffle('x', 0, 'x', 'x')*inputimage),)
-        if len(inputimage.ndim) == 2:
+        if inputimage.ndim == 2:
             return (T.cos(self.a*inputimage),)
         else:
             raise NotImplementedError
     
     def forwardSize(self, inputsize):
         isize = inputsize[0]
-        ainit = np.zeros((isize[1],))
+        ainit = floatX(np.ones((isize[1],)))
         self.a = theano.shared(ainit, borrow=True)
         if len(isize) == 4:
             return [(isize[0], isize[1], isize[2], isize[3])]
