@@ -46,6 +46,23 @@ class TestConv2d(unittest.TestCase):
         
         y_shape = f(x).shape
         self.assertEqual(y_shape, (500, 20, 28, 28))
+        
+    def test_conv2d_dropconnect(self):
+        conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20, dc=0.5)
+        x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
+        
+        size = conv2d.forwardSize([(500, 1 ,28, 28)])       
+        input_x = T.tensor4()
+        y = conv2d.forward([input_x,])[0]
+
+        w_shape = conv2d.w.eval().shape
+        w_number = w_shape[0]*w_shape[1]*w_shape[2]*w_shape[3]
+        new_w = conv2d.w.eval().reshape(w_number)
+        counter = 0
+        for x in range(w_number):
+            if abs(new_w[x]) == 0:
+                counter=counter+1
+        self.assertEqual(round(counter/w_number,1), conv2d.dc)
 
 class TestPooling(unittest.TestCase):
     
@@ -115,6 +132,21 @@ class TestFullConn(unittest.TestCase):
         y = fc.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))
+        
+    def test_fullConn_dropconnect(self):
+        x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1000)))
+        x = theano.shared(x,borrow = True)
+        fc = N.FullConn(input_feature=1000, output_feature=10, dc=0.5)
+        y = fc.forward([x])
+
+        w_shape = fc.w.eval().shape
+        w_number = w_shape[0]*w_shape[1]
+        new_w = fc.w.eval().reshape(w_number)
+        counter = 0
+        for x in range(w_number):
+            if abs(new_w[x]) == 0:
+                counter=counter+1
+        self.assertEqual(round(counter/w_number,1), fc.dc)
         
 class TestSoftmax(unittest.TestCase):
     
