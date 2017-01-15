@@ -14,6 +14,7 @@ class Job:
             rv = fcntl.lockf(f.fileno(), fcntl.LOCK_EX)
             print("job {} is running.".format(os.getpid()))
             f.write(str(os.getpid()) + '\n')
+            f.flush()
             self.action()
             fcntl.lockf(f.fileno(), fcntl.LOCK_UN)
 
