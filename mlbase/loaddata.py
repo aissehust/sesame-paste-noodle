@@ -19,7 +19,21 @@ def load_mnist():
 
     return trX, trY, teX, teY
 
-def load_cifar10(batch):
+def load_cifar10():
+    (x1,y1) = load_cifar10_batch(1)
+    (x2,y2) = load_cifar10_batch(2)
+    (x3,y3) = load_cifar10_batch(3)
+    (x4,y4) = load_cifar10_batch(4)
+    (x5,y5) = load_cifar10_batch(5)
+
+    xall = np.vstack((x1,x2,x3,x4,x5))
+    yall = np.vstack((y1,y2,y3,y4,y5))
+
+    (x_test, y_test) = load_cifar10_batch('test')
+
+    return xall, yall, x_test, y_test
+
+def load_cifar10_batch(batch):
     fp = '/hdd/home/largedata/CIFAR10/cifar-10-batches-py/'
     if batch == 'test':
         fp = os.path.join(fp, 'test_batch')
