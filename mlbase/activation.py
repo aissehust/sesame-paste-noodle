@@ -73,6 +73,53 @@ class Relu(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+class ConcatenatedReLU(NonLinear):
+    debugname = 'ConcatenatedReLU'
+    LayerTypeName = 'ConcatenatedReLU'
+    yaml_tag = u'!ConcatenatedReLU'
+            
+    def __init__(self):
+        super(ConcatenatedReLU, self).__init__()
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        return (T.concatenate([T.nnet.relu(inputimage), T.nnet.relu(-inputimage)], axis=1),)
+
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        if len(isize) == 4:
+            return ((isize[0], isize[1]*2, isize[2], isize[3]),)
+        else:
+            raise NotImplementedError('ConcatenatedReLU should follow conv2d.')
+
+    def __str__(self):
+        ret = 'ConcatenatedReLU:'
+        return ret
+
+    def fillToObjMap(self):
+        objDict = super(ConcatenatedReLU, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(ConcatenatedReLU, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(ConcatenatedRelu.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = ConcatenatedReLU()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+        
+
 class Sine(NonLinear):
     debugname = 'sine'
     LayerTypeName = 'Sine'
@@ -140,6 +187,52 @@ class Cosine(NonLinear):
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
         ret = Cosine()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+class ConcatenatedSin(NonLinear):
+    debugname = 'ConcatenatedSin'
+    LayerTypeName = 'ConcatenatedSin'
+    yaml_tag = u'!ConcatenatedSin'
+            
+    def __init__(self):
+        super(ConcatenatedSin, self).__init__()
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        return (T.concatenate([T.sin(inputimage), T.cos(inputimage)], axis=1),)
+
+    def forwardSize(self, inputsize):
+        isize = inputsize[0]
+        if len(isize) == 4:
+            return ((isize[0], isize[1]*2, isize[2], isize[3]),)
+        else:
+            raise NotImplementedError('ConcatenatedSin should follow conv2d.')
+
+    def __str__(self):
+        ret = 'ConcatenatedSin:'
+        return ret
+
+    def fillToObjMap(self):
+        objDict = super(ConcatenatedSin, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(ConcatenatedSin, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(ConcatenatedRelu.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = ConcatenatedSin()
         ret.loadFromObjMap(obj_dict)
         return ret
 
