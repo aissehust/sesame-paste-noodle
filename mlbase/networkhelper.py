@@ -12,6 +12,7 @@ import mlbase.gradient_optimizer as opt
 import mlbase.regularization as reg
 from mlbase.util import floatX
 import mlbase.init as winit
+import collections
 
 
 class Layer(yaml.YAMLObject):
@@ -123,6 +124,12 @@ class Layer(yaml.YAMLObject):
         """
         return
 
+def layerhelper(cls):
+    if hasattr(cls, 'predictForward') and cls.predictForward == Layer.predictForward:
+        setattr(cls, 'predictForward', cls.forward)
+
+    return cls
+
 class MoreIn(Layer):
     """
     Combine more than one input to form a output.
@@ -196,6 +203,7 @@ class RawInput(Layer):
     This is THE INPUT Class. Class type is checked during network building.
     """
 
+    debugname = 'RawInput'
     LayerTypeName = 'RawInput'
     yaml_tag = u'!RawInput'
     
@@ -243,7 +251,7 @@ class RawInput(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
-        
+@layerhelper
 class Conv2d(Layer):
 
     debugname = 'conv2d'
@@ -376,6 +384,7 @@ class Conv2d(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+@layerhelper
 class Pooling(Layer):
     debugname = 'pooling'
     LayerTypeName = 'Pooling'
@@ -423,6 +432,7 @@ class Pooling(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+@layerhelper
 class GlobalPooling(Layer):
     debugname = 'globalpooling'
     LayerTypeName = 'GlobalPooling'
@@ -469,6 +479,7 @@ class GlobalPooling(Layer):
         return ret
 
 
+@layerhelper
 class FeaturePooling(Layer):
     """
     For maxout
@@ -559,6 +570,8 @@ class UpPooling(Layer):
 
         return f
 
+
+@layerhelper
 class Flatten(Layer):
     debugname = 'Flatten'
     LayerTypeName = 'Flatten'
@@ -602,6 +615,8 @@ class Flatten(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class FullConn(Layer):
 
     debugname = 'Full Connection'
@@ -703,6 +718,8 @@ class FullConn(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+        
+@layerhelper
 class SoftMax(Layer):
     debugname = 'softmax'
     LayerTypeName = 'SoftMax'
@@ -746,6 +763,8 @@ class SoftMax(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class BatchNormalization(Layer):
     
     debugname = 'bn'
@@ -918,6 +937,7 @@ class Dropout(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+        
 class Network(learner.SupervisedLearner):
     """
     Theano based neural network.
@@ -1045,6 +1065,17 @@ class Network(learner.SupervisedLearner):
         #self.layers.append(layer)
         return
 
+    def connect(self, prelayer, nextlayer, reload=False):
+            
+        if not reload:
+            layerCounter = self.layerNextCounter()
+            nextlayer.name = nextlayer.LayerTypeName + layerCounter
+            nextlayer.saveName = nextlayer.LayerTypeName + layerCounter
+
+        nextlayer.inputLayer.append(prelayer)
+        prelayer.outputLayer.append(nextlayer)
+        return
+
     def resetLayer(self):
         pass
 
@@ -1052,15 +1083,32 @@ class Network(learner.SupervisedLearner):
         """
         Use this method to iterate over all known layers.
         """
-        layer = self.inputLayers[0]
+        visitedLayer = {}
+        openEndLayer = collections.deque()
+        for inputLayer in self.inputLayers:
+            openEndLayer.append(inputLayer)
+            
         shouldStop = False
+            
         while not shouldStop:
-            yield layer
+            yieldLayer = None
 
-            if len(layer.outputLayer) <= 0:
+            if len(openEndLayer) <= 0:
                 shouldStop = True
             else:
-                layer = layer.outputLayer[0]
+                for yieldCandidate in openEndLayer:
+                    if issubclass(type(yieldCandidate), RawInput) or \
+                       all([i in visitedLayer for i in yieldCandidate.inputLayer]):
+                        yieldLayer = yieldCandidate
+                        openEndLayer.remove(yieldCandidate)
+                        visitedLayer[yieldCandidate] = 1
+                        for item in yieldCandidate.outputLayer:
+                            openEndLayer.appendleft(item)
+                            
+                        break
+
+                yield yieldLayer
+                
 
     def getNameLayerMap(self):
         ret = {}
@@ -1069,31 +1117,53 @@ class Network(learner.SupervisedLearner):
         return ret
 
     def build(self, reload=False):
-        currentTensor = (self.X,)
-        currentPredictTensor = (self.X,)
 
-        # TODO: learn from multiple source.
         self.params = []
-        currentSize = []
         extraUpdates = []
+        buildBuffer = collections.OrderedDict()
+        
         for layer in self.nextLayer():
             if self.debug:
                 print('Building for: {}'.format(layer.debugname))
 
+            if issubclass(type(layer), RawInput):
+                buildBuffer[layer] = (layer.forwardSize([]), layer.forward((self.X,)), layer.predictForward((self.X,)))
+                continue
+
+            currentSize = None
+            currentTensor = None
+            currentPredictTensor = None
+            
             # forwardSize should be called first
             # as some parameter initialization depends on size info.    
             # But this should be skipped if model is loaded.
             # Because forwardSize() usually initliazes parameters.
             if not reload:
-                currentSize = layer.forwardSize(currentSize)
+                allInputSize = []
+                for p in layer.inputLayer:
+                    allInputSize += buildBuffer[p][0]
+                currentSize = layer.forwardSize(allInputSize)
 
             self.params += layer.getpara()
-            currentTensor = layer.forward(currentTensor)
-            currentPredictTensor = layer.predictForward(currentTensor)
+
+            allInputTensor = []
+            allInputPredictTensor = []
+            for p in layer.inputLayer:
+                allInputTensor += buildBuffer[p][1]
+                allInputPredictTensor += buildBuffer[p][2]
+
+            currentTensor = layer.forward(allInputTensor)
+            currentPredictTensor = layer.predictForward(allInputPredictTensor)
+
+            buildBuffer[layer] = (currentSize, currentTensor, currentPredictTensor)
             
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
 
+        lastTriple = buildBuffer.popitem()
+        currentTensor = lastTriple[1][1]
+        currentPredictTensor = lastTriple[1][2]
+                
         self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0], self.Y))
         if self.regulator is not None:
             self.cost = self.regulator.addPenalty(self.cost, self.params)

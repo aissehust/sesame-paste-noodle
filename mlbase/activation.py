@@ -3,7 +3,9 @@ import theano.tensor as T
 import mlbase.networkhelper as N
 import numpy as np
 from mlbase.util import floatX
+from mlbase.networkhelper import layerhelper
 
+@layerhelper
 class NonLinear(N.Layer):
     LayerTypeName = 'NonLinear'
     yaml_tag = u'!NonLinear'
@@ -31,6 +33,8 @@ class NonLinear(N.Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper        
 class Relu(NonLinear):
     debugname = 'relu'
     LayerTypeName = 'Relu'
@@ -73,6 +77,8 @@ class Relu(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class ConcatenatedReLU(NonLinear):
     debugname = 'ConcatenatedReLU'
     LayerTypeName = 'ConcatenatedReLU'
@@ -120,6 +126,7 @@ class ConcatenatedReLU(NonLinear):
         return ret
         
 
+@layerhelper
 class Sine(NonLinear):
     debugname = 'sine'
     LayerTypeName = 'Sine'
@@ -155,6 +162,8 @@ class Sine(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class Cosine(NonLinear):
     debugname = 'cos'
     LayerTypeName = 'Cosine'
@@ -190,6 +199,8 @@ class Cosine(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+        
+@layerhelper
 class ConcatenatedSin(NonLinear):
     debugname = 'ConcatenatedSin'
     LayerTypeName = 'ConcatenatedSin'
@@ -236,6 +247,8 @@ class ConcatenatedSin(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class AbsoluteValue(NonLinear):
     debugname = 'absolutevalue'
     LayerTypeName = 'AbsoluteValue'
@@ -273,6 +286,7 @@ class AbsoluteValue(NonLinear):
         return ret
 
 
+@layerhelper
 class Triangle(NonLinear):
     debugname = 'triangle'
     LayerTypeName = 'Triangle'
@@ -310,6 +324,7 @@ class Triangle(NonLinear):
         return ret
         
 # every layer has a different 'a' that can be learned
+@layerhelper
 class Sine2(NonLinear):
     debugname = 'sine2'
     LayerTypeName = 'Sine2'
@@ -358,6 +373,8 @@ class Sine2(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class Cosine2(NonLinear):
     debugname = 'cos2'
     LayerTypeName = 'Cosine2'
@@ -407,6 +424,7 @@ class Cosine2(NonLinear):
         return ret
 
 # every feature map has a different 'a' that can be learned
+@layerhelper
 class Sine3(NonLinear):
     debugname = 'sine3'
     LayerTypeName = 'Sine3'
@@ -460,6 +478,7 @@ class Sine3(NonLinear):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+@layerhelper
 class Cosine3(NonLinear):
     debugname = 'cos3'
     LayerTypeName = 'Cosine3'
