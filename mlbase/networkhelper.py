@@ -124,6 +124,12 @@ class Layer(yaml.YAMLObject):
         """
         return
 
+def layerhelper(cls):
+    if hasattr(cls, 'predictForward') and cls.predictForward == Layer.predictForward:
+        setattr(cls, 'predictForward', cls.forward)
+
+    return cls
+
 class MoreIn(Layer):
     """
     Combine more than one input to form a output.
@@ -245,7 +251,7 @@ class RawInput(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
-        
+@layerhelper
 class Conv2d(Layer):
 
     debugname = 'conv2d'
@@ -378,6 +384,7 @@ class Conv2d(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+@layerhelper
 class Pooling(Layer):
     debugname = 'pooling'
     LayerTypeName = 'Pooling'
@@ -425,6 +432,7 @@ class Pooling(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+@layerhelper
 class GlobalPooling(Layer):
     debugname = 'globalpooling'
     LayerTypeName = 'GlobalPooling'
@@ -471,6 +479,7 @@ class GlobalPooling(Layer):
         return ret
 
 
+@layerhelper
 class FeaturePooling(Layer):
     """
     For maxout
@@ -561,6 +570,8 @@ class UpPooling(Layer):
 
         return f
 
+
+@layerhelper
 class Flatten(Layer):
     debugname = 'Flatten'
     LayerTypeName = 'Flatten'
@@ -604,6 +615,8 @@ class Flatten(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class FullConn(Layer):
 
     debugname = 'Full Connection'
@@ -705,6 +718,8 @@ class FullConn(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+        
+@layerhelper
 class SoftMax(Layer):
     debugname = 'softmax'
     LayerTypeName = 'SoftMax'
@@ -748,6 +763,8 @@ class SoftMax(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+
+@layerhelper
 class BatchNormalization(Layer):
     
     debugname = 'bn'
@@ -920,6 +937,7 @@ class Dropout(Layer):
         ret.loadFromObjMap(obj_dict)
         return ret
 
+        
 class Network(learner.SupervisedLearner):
     """
     Theano based neural network.
@@ -1110,7 +1128,6 @@ class Network(learner.SupervisedLearner):
 
             if issubclass(type(layer), RawInput):
                 buildBuffer[layer] = (layer.forwardSize([]), layer.forward((self.X,)), layer.predictForward((self.X,)))
-                print(buildBuffer[layer])
                 continue
 
             currentSize = None
@@ -1139,7 +1156,6 @@ class Network(learner.SupervisedLearner):
             currentPredictTensor = layer.predictForward(allInputPredictTensor)
 
             buildBuffer[layer] = (currentSize, currentTensor, currentPredictTensor)
-            print(buildBuffer[layer])
             
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
@@ -1147,9 +1163,6 @@ class Network(learner.SupervisedLearner):
         lastTriple = buildBuffer.popitem()
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
-        print(lastTriple[0].debugname)
-        print(currentTensor)
-        print(currentPredictTensor)
                 
         self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0], self.Y))
         if self.regulator is not None:
