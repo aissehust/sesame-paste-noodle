@@ -9,8 +9,9 @@ def test_seqlayer():
     network.debug = True
 
     class ConvNN(N.Layer, metaclass=N.SeqLayer,
-                 seq=[N.Conv2d, act.Relu, N.Pooling]
-                 ):
+                 seq=[N.Conv2d, act.Relu, N.Pooling],
+                 yaml_tag=u'!ConvNN',
+                 type_name='ConvNN'):
         def __init__(self, feature_map_multiplier=1):
             super().__init__()
             self.bases[0] = N.Conv2d(feature_map_multiplier=feature_map_multiplier)
