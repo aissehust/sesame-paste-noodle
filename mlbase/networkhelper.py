@@ -946,6 +946,10 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
         for basecls in kwds['seq']:
             result.basecls.append(basecls)
 
+        result.yaml_tag = kwds['yaml_tag']
+        result.LayerTypeName = kwds['type_name']
+        result.debugname = result.LayerTypeName.lower()
+
         def seqnew(selfc, **kwds):
             result1 = object.__new__(selfc)
             result1.bases = []
@@ -954,6 +958,7 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
             return result1
         result.__new__ = seqnew
 
+        # parameter and backward propagation
         def getpara(selfc):
             allpara = []
             for baseobj in selfc.bases:
@@ -961,6 +966,7 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
             return allpara
         result.getpara = getpara
 
+        # forward computing
         def forward(selfc, inputtensor):
             for baseobj in selfc.bases:
                 inputtensor = baseobj.forward(inputtensor)
@@ -979,20 +985,32 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
             return inputsize
         result.forwardSize = forwardSize
 
+        # save and load stuff
         def fillToObjMap(selfc):
-            raise NotImplementedError
+            objDict = super(result, selfc).fillToObjMap()
+            listOfMap = []
+            for baseobj in selfc.bases:
+                listOfMap.append(baseobj.fillToObjMap())
+            objDict['components'] = listOfMap
         result.fillToObjMap = fillToObjMap
 
-        def loadFromObjMap(selfc):
-            raise NotImplementedError
+        def loadFromObjMap(selfc, tmap):
+            super(result, selfc).loadFromObjMap(tmap)
+            for (baseobj, baseObjDict) in zip(ret.bases, tmap['components']):
+                baseobj.loadFromObjMap(baseObjDict)
         result.loadFromObjMap = loadFromObjMap
 
         def to_yaml(cls, dumper, data):
-            raise NotImplementedError
+            obj_dict = data.fillToObjMap()
+            node = dumper.represent_mapping(cls.yaml_tag, obj_dict)
+            return node
         result.to_yaml = classmethod(to_yaml)
 
         def from_yaml(cls, loader, node):
-            raise NotImplementedError
+            obj_dict = loader.construct_sequence(node)
+            ret = result()
+            ret.loadFromObjMap(obj_dict)
+            return ret
         result.from_yaml = classmethod(from_yaml)
         
         return result
