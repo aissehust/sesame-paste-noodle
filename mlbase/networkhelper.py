@@ -992,12 +992,15 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
             for baseobj in selfc.bases:
                 listOfMap.append(baseobj.fillToObjMap())
             objDict['components'] = listOfMap
+
+            return objDict
         result.fillToObjMap = fillToObjMap
 
         def loadFromObjMap(selfc, tmap):
             super(result, selfc).loadFromObjMap(tmap)
-            for (baseobj, baseObjDict) in zip(ret.bases, tmap['components']):
+            for (baseobj, baseObjDict) in zip(selfc.bases, tmap['components']):
                 baseobj.loadFromObjMap(baseObjDict)
+            return
         result.loadFromObjMap = loadFromObjMap
 
         def to_yaml(cls, dumper, data):
@@ -1007,7 +1010,7 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
         result.to_yaml = classmethod(to_yaml)
 
         def from_yaml(cls, loader, node):
-            obj_dict = loader.construct_sequence(node)
+            obj_dict = loader.construct_mapping(node)
             ret = result()
             ret.loadFromObjMap(obj_dict)
             return ret
@@ -1016,6 +1019,9 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
         return result
 
     def __init__(self, name, bases, namespace, **kwds):
+        
+        # interface with yaml, checkout YAMLObjectMetaclass
+        namespace['yaml_tag'] = kwds['yaml_tag']
         super().__init__(name, bases, namespace)
 
 
