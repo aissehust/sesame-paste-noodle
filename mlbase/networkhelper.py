@@ -20,7 +20,7 @@ class Layer(yaml.YAMLObject):
     debugname = 'update layer name'
     LayerTypeName = 'Layer'
     yaml_tag = u'!Layer'
-    
+
     def __init__(self):
         # Layer name may used to print/debug
         # per instance
@@ -936,6 +936,72 @@ class Dropout(Layer):
                       rescale=obj_dict['rescale'])
         ret.loadFromObjMap(obj_dict)
         return ret
+
+        
+class SeqLayer(yaml.YAMLObjectMetaclass):
+    def __new__(cls, name, bases, namespace, **kwds):
+        result = super().__new__(cls, name, bases, dict(namespace))
+
+        result.basecls = []
+        for basecls in kwds['seq']:
+            result.basecls.append(basecls)
+
+        def seqnew(selfc, **kwds):
+            result1 = object.__new__(selfc)
+            result1.bases = []
+            for basecls in selfc.basecls:
+                result1.bases.append(basecls())
+            return result1
+        result.__new__ = seqnew
+
+        def getpara(selfc):
+            allpara = []
+            for baseobj in selfc.bases:
+                allpara += baseobj.getpara()
+            return allpara
+        result.getpara = getpara
+
+        def forward(selfc, inputtensor):
+            for baseobj in selfc.bases:
+                inputtensor = baseobj.forward(inputtensor)
+            return inputtensor
+        result.forward = forward
+
+        def predictForward(selfc, inputtensor):
+            for baseobj in selfc.bases:
+                inputtensor = baseobj.predictForward(inputtensor)
+            return inputtensor
+        result.predictForward = predictForward
+
+        def forwardSize(selfc, inputsize):
+            for baseobj in selfc.bases:
+                inputsize = baseobj.forwardSize(inputsize)
+            return inputsize
+        result.forwardSize = forwardSize
+
+        def fillToObjMap(selfc):
+            raise NotImplementedError
+        result.fillToObjMap = fillToObjMap
+
+        def loadFromObjMap(selfc):
+            raise NotImplementedError
+        result.loadFromObjMap = loadFromObjMap
+
+        def to_yaml(cls, dumper, data):
+            raise NotImplementedError
+        result.to_yaml = classmethod(to_yaml)
+
+        def from_yaml(cls, loader, node):
+            raise NotImplementedError
+        result.from_yaml = classmethod(from_yaml)
+        
+        return result
+
+    def __init__(self, name, bases, namespace, **kwds):
+        super().__init__(name, bases, namespace)
+
+
+    
 
         
 class Network(learner.SupervisedLearner):

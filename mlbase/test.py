@@ -4,6 +4,38 @@ import numpy as np
 import activation as act
 import mlbase.loaddata as l
 
+def test_seqlayer():
+    network = N.Network()
+    network.debug = True
+
+    class ConvNN(N.Layer, metaclass=N.SeqLayer,
+                 seq=[N.Conv2d, act.Relu, N.Pooling]
+                 ):
+        def __init__(self, feature_map_multiplier=1):
+            super().__init__()
+            self.bases[0] = N.Conv2d(feature_map_multiplier=feature_map_multiplier)
+
+    network.setInput(N.RawInput((1, 28,28)))
+            
+    network.append(ConvNN(feature_map_multiplier=32))
+    network.append(ConvNN(feature_map_multiplier=2))
+    network.append(ConvNN(feature_map_multiplier=2))
+    
+    network.append(N.Flatten())
+    network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
+    network.append(act.Relu())
+    network.append(N.FullConn(input_feature=1152*2, output_feature=10))
+    network.append(N.SoftMax())
+
+    network.build()
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
+
 def testload():
     n = N.Network()
     n.loadFromFile()
@@ -378,5 +410,6 @@ def test1():
 
 if __name__ == "__main__":
     #test_maxout()
-    test2()
+    #test2()
+    test_seqlayer()
 
