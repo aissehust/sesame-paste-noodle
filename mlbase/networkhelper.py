@@ -1049,6 +1049,7 @@ class Network(learner.SupervisedLearner):
         self.latestLinkName = 'LAST'
         self.modelSaveInterval = 20
         self.modelSaveCounter = 0
+        self.lastSaveAbsolutePath = None
 
     @property
     def modelPrefix(self):
@@ -1258,8 +1259,11 @@ class Network(learner.SupervisedLearner):
         if self.modelSaveInterval > 0:
             self.modelSaveCounter += 1
             if self.modelSaveCounter % self.modelSaveInterval == 0:
-                self.saveToFile()
+                newSavedFile = self.saveToFile()
                 self.updateLatestLink()
+                if self.lastSaveAbsolutePath is not None:
+                    os.remove(self.lastSaveAbsolutePath)
+                self.lastSaveAbsolutePath = newSavedFile
 
     def predict(self, X):
         startIndex = 0
@@ -1369,14 +1373,13 @@ class Network(learner.SupervisedLearner):
         Use the given file name if supplied.
         This may take some time when the model is large.
         """
-        fh = None
-        if fileName is not None:
-            fh = open(fileName, 'w')
-        else:
-            fh = open(self.getSaveModelName(), 'w')
-        self.save(fh)
-        fh.flush()
-        fh.close()
+        if fileName is None:
+            fileName = self.getSaveModelName()
+        with open(fileName, 'w') as fh:
+            self.save(fh)
+            fh.flush()
+        return fileName
+
 
     def loadFromFile(self, fileName=None):
         fh = None
