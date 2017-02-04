@@ -15,8 +15,7 @@ before_install:
 
 install:
   - /usr/bin/g++ --version
-  - pip install numpy
-  - pip install git+https://github.com/Theano/Theano.git#egg=Theano
+  - pip install theano
   - pip install h5py
   - pip install pyyaml
 
