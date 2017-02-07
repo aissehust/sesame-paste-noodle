@@ -5,7 +5,7 @@ import theano.tensor.nnet as nnet
 import datetime
 import yaml
 import os
-import mlbase.networkhelper as N
+import mlbase.network as N
 import h5py
 import mlbase.cost as cost
 import mlbase.layers.activation as act

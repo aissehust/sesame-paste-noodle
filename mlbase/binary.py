@@ -1,7 +1,7 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import mlbase.networkhelper as N
+import mlbase.network as N
 import h5py
 
 from theano.scalar.basic import UnaryScalarOp, same_out_nocomplex

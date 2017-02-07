@@ -1,4 +1,4 @@
-from . import networkhelper
+from . import network
 from . import layers
 from . import cost
 from . import loaddata
