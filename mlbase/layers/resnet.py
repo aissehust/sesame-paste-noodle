@@ -1,14 +1,13 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import mlbase.network as N
-import h5py
 import sys
+from mlbase.layers import layer
 
 theano.gof.optdb.max_use_ratio=20.0
 sys.setrecursionlimit(10000)
 
-class ResLayer(N.Layer):
+class ResLayer(layer.Layer):
     """
     This is the building block for ResNet.
     By the paper, the output of one residual layer is
@@ -120,6 +119,9 @@ class ResLayer(N.Layer):
         return ret
 
 def test():
+    import mlbase.network as N
+    import h5py
+    
     network = N.Network()
     network.debug = True
 
@@ -159,9 +161,8 @@ def test():
 
 
 def test_deeper():
-    
+    import h5py
 
-            
     network = N.Network()
     network.debug = True
 

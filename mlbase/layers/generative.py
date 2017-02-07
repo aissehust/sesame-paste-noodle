@@ -2,15 +2,8 @@ import numpy as np
 import theano
 import theano.tensor as T
 import theano.tensor.nnet as nnet
-import datetime
-import yaml
-import os
-import mlbase.network as N
-import h5py
-import mlbase.cost as cost
-import mlbase.layers.activation as act
 from mlbase.layers import layer
-
+from mlbase.util import floatX
 
 class UpConv2d(layer.Layer):
     """
@@ -118,7 +111,7 @@ class UpConv2d(layer.Layer):
                 self.outputFeatureDim = isize[1]
                 self.inputFeatureDim = isize[1] // self.mapMulti
 
-        initweight = N.floatX(np.random.randn(self.outputFeatureDim,
+        initweight = floatX(np.random.randn(self.outputFeatureDim,
                                               self.inputFeatureDim,
                                               *self.filterSize) * 0.01)
         self.w = theano.shared(initweight, borrow=True)
@@ -182,6 +175,10 @@ def testUNet():
     
             
 def test():
+    import mlbase.cost as cost
+    import mlbase.layers.activation as act
+    import h5py
+        
     network = N.Network()
     network.debug = True
 

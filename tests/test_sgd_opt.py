@@ -1,7 +1,8 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import mlbase.networkhelper as N
+import mlbase.network as N
+import mlbase.layers.layer as layer
 import unittest
 import mlbase.gradient_optimizer as opt
 
