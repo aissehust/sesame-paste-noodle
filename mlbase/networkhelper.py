@@ -1283,6 +1283,7 @@ class Network(learner.SupervisedLearner):
         if self.modelSaveInterval > 0:
             self.modelSaveCounter += 1
             if self.modelSaveCounter % self.modelSaveInterval == 0:
+                print('Saving model...')
                 newSavedFile = self.saveToFile()
                 self.updateLatestLink()
                 if self.lastSaveAbsolutePath is not None:
