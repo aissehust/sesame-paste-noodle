@@ -1,8 +1,10 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import mlbase.networkhelper as N
+import mlbase.network as N
+import mlbase.layers as layer
 import unittest
+from mlbase.layers.conv import Conv2d
 
 rng = np.random.RandomState(1111)
 def floatX(X):
@@ -18,7 +20,7 @@ class TestConv2d(unittest.TestCase):
     
     def test_conv2d_forwardSize(self):
         x = [(100, 1, 28, 28)]
-        conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         y = conv2d.forwardSize(x)
         self.assertEqual(y, [(100, 20, 28, 28)])
     
@@ -35,7 +37,7 @@ class TestConv2d(unittest.TestCase):
         self.assertEqual(y_shape, (500, 20, 28, 28))
         
     def test_conv2d_forward2(self):
-        conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
         size = conv2d.forwardSize([(500, 1 ,28, 28)])
 
@@ -48,7 +50,7 @@ class TestConv2d(unittest.TestCase):
         self.assertEqual(y_shape, (500, 20, 28, 28))
         
     def test_conv2d_dropconnect(self):
-        conv2d = N.Conv2d(filter_size=(3,3), feature_map_multiplier=20, dc=0.5)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20, dc=0.5)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
         
         size = conv2d.forwardSize([(500, 1 ,28, 28)])       
@@ -68,14 +70,14 @@ class TestPooling(unittest.TestCase):
     
     def test_pooling_forwardSize(self):
         x = [(100, 1, 28, 28)]
-        pool = N.Pooling()
+        pool = layer.Pooling()
         y = pool.forwardSize(x)
         self.assertEqual(y, [(100, 1, 14, 14)])
         
     def test_pooling_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 20 ,28, 28)))
         x = theano.shared(x,borrow = True)
-        pooling = N.Pooling()
+        pooling = layer.Pooling()
         y = pooling.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 20, 14, 14))
@@ -84,14 +86,14 @@ class TestGlobalPooling(unittest.TestCase):
 
     def test_globalpooling_forwardSize(self):
         x = [(256, 32, 28, 28)]
-        gp = N.GlobalPooling()
+        gp = layer.GlobalPooling()
         y = gp.forwardSize(x)
         self.assertEqual(y, [(256, 32)])
         
     def test_globalpooling_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10 ,14, 14)))
         x = theano.shared(x,borrow = True)
-        gp = N.GlobalPooling()
+        gp = layer.GlobalPooling()
         y = gp.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))
@@ -105,14 +107,14 @@ class TestFlatten(unittest.TestCase):
     
     def test_flatten_forwaredSize(self):
         x = [(100, 10, 28, 28)]
-        flatten = N.Flatten()
+        flatten = layer.Flatten()
         y = flatten.forwardSize(x)
         self.assertEqual(y, [(100, 7840)])
     
     def test_flatten_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10 ,28, 28)))
         x = theano.shared(x,borrow = True)
-        flatten = N.Flatten()
+        flatten = layer.Flatten()
         y = flatten.forward((x,))
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 7840))
@@ -121,14 +123,14 @@ class TestFullConn(unittest.TestCase):
     
     def test_fullConn_forwardSize(self):
         x = [(500, 2000)]
-        fc = N.FullConn(input_feature=2000, output_feature=10)
+        fc = layer.FullConn(input_feature=2000, output_feature=10)
         y = fc.forwardSize(x)
         self.assertEqual(y, [(500, 10)])
         
     def test_fullConn_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1000)))
         x = theano.shared(x,borrow = True)
-        fc = N.FullConn(input_feature=1000, output_feature=10)
+        fc = layer.FullConn(input_feature=1000, output_feature=10)
         y = fc.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))
@@ -136,7 +138,7 @@ class TestFullConn(unittest.TestCase):
     def test_fullConn_dropconnect(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1000)))
         x = theano.shared(x,borrow = True)
-        fc = N.FullConn(input_feature=1000, output_feature=10, dc=0.5)
+        fc = layer.FullConn(input_feature=1000, output_feature=10, dc=0.5)
         y = fc.forward([x])
 
         w_shape = fc.w.eval().shape
@@ -152,14 +154,14 @@ class TestSoftmax(unittest.TestCase):
     
     def test_softmax_forwardSize(self):
         x = [(500, 10)]
-        softmax = N.SoftMax()
+        softmax = layer.SoftMax()
         y = softmax.forwardSize(x)
         self.assertEqual(y, [(500,10)])
         
     def test_softmax_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10)))
         x = theano.shared(x,borrow = True)
-        sm = N.SoftMax()
+        sm = layer.SoftMax()
         y = sm.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))      
@@ -168,14 +170,14 @@ class TestBatchNormalization(unittest.TestCase):
     
     def test_batchNormalization_forwardSize(self):
         x = [(500, 20, 28, 28)]
-        bn = N.BatchNormalization()
+        bn = layer.BatchNormalization()
         y = bn.forwardSize(x)
         self.assertEqual(y, [(500, 20, 28, 28)])
         
     def test_batchNormalizaton_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10, 28, 28)))
         x = theano.shared(x,borrow = True)
-        bn = N.BatchNormalization()
+        bn = layer.BatchNormalization()
         size = bn.forwardSize([(500, 10, 28, 28)])
         y = bn.forward([x])
         y_shape = y[0].eval().shape
@@ -185,14 +187,14 @@ class TestDropout(unittest.TestCase):
     
     def test_Dropout_forwardSize(self):
         x = [(500, 20, 28, 28)]
-        d = N.Dropout()
+        d = layer.Dropout()
         y = d.forwardSize(x)
         self.assertEqual(y, [(500, 20, 28, 28)])
         
     def test_Dropout_forward(self):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 10, 28, 28)))
         x = theano.shared(x,borrow = True)
-        d = N.Dropout()
+        d = layer.Dropout()
         y = d.forward([x])
         y_shape = y[0].eval().shape
         pixel_number = y_shape[0]*y_shape[1]*y_shape[2]*y_shape[3]
