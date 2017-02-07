@@ -8,10 +8,11 @@ import os
 import mlbase.networkhelper as N
 import h5py
 import mlbase.cost as cost
-import mlbase.activation as act
+import mlbase.layers.activation as act
+from mlbase.layers import layer
 
 
-class UpConv2d(N.Layer):
+class UpConv2d(layer.Layer):
     """
     Theano explanation of the ops can be found at:
     http://deeplearning.net/software/theano_versions/dev/tutorial/conv_arithmetic.html

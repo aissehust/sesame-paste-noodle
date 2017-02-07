@@ -1,32 +1,33 @@
 import mlbase.networkhelper as N
 import h5py
 import numpy as np
-import activation as act
+import mlbase.layers.activation as act
 import mlbase.loaddata as l
+from mlbase.layers import layer
 
 def test_seqlayer():
     network = N.Network()
     network.debug = True
 
-    class ConvNN(N.Layer, metaclass=N.SeqLayer,
-                 seq=[N.Conv2d, act.Relu, N.Pooling],
+    class ConvNN(layer.Layer, metaclass=layer.SeqLayer,
+                 seq=[layer.Conv2d, act.Relu, layer.Pooling],
                  yaml_tag=u'!ConvNN',
                  type_name='ConvNN'):
         def __init__(self, feature_map_multiplier=1):
             super().__init__()
-            self.bases[0] = N.Conv2d(feature_map_multiplier=feature_map_multiplier)
+            self.bases[0] = layer.Conv2d(feature_map_multiplier=feature_map_multiplier)
 
-    network.setInput(N.RawInput((1, 28,28)))
+    network.setInput(layer.RawInput((1, 28,28)))
             
     network.append(ConvNN(feature_map_multiplier=32))
     network.append(ConvNN(feature_map_multiplier=2))
     network.append(ConvNN(feature_map_multiplier=2))
     
-    network.append(N.Flatten())
-    network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
+    network.append(layer.Flatten())
+    network.append(layer.FullConn(input_feature=1152, output_feature=1152*2))
     network.append(act.Relu())
-    network.append(N.FullConn(input_feature=1152*2, output_feature=10))
-    network.append(N.SoftMax())
+    network.append(layer.FullConn(input_feature=1152*2, output_feature=10))
+    network.append(layer.SoftMax())
 
     network.build()
 

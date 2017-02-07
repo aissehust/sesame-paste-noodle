@@ -1,12 +1,13 @@
 import theano
 import theano.tensor as T
-import mlbase.networkhelper as N
+from mlbase.layers import layer
 import numpy as np
 from mlbase.util import floatX
-from mlbase.networkhelper import layerhelper
+from mlbase.layers.layer import layerhelper
+
 
 @layerhelper
-class NonLinear(N.Layer):
+class NonLinear(layer.Layer):
     LayerTypeName = 'NonLinear'
     yaml_tag = u'!NonLinear'
     

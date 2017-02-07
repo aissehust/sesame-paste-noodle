@@ -1,5 +1,5 @@
 from . import networkhelper
-from . import activation
+from . import layers
 from . import cost
 from . import loaddata
 from . import regularization
