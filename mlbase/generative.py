@@ -8,6 +8,7 @@ import os
 import mlbase.networkhelper as N
 import h5py
 import mlbase.cost as cost
+import mlbase.activation as act
 
 
 class UpConv2d(N.Layer):
@@ -25,7 +26,7 @@ class UpConv2d(N.Layer):
     
     Note that this op has multiple names:
     * transposed convolution
-    * deconvolution
+    * deconvolution (right term?)
     * upconvolution
     """
 
@@ -79,6 +80,7 @@ class UpConv2d(N.Layer):
         y = T.nnet.abstract_conv.conv2d_grad_wrt_inputs(x, self.w,
                                                         input_shape=(None,
                                                                      self.inputFeatureDim,
+                                                                     #None, None is also ok for inputFeatureDim,
                                                                      int(self.dataSize[0]*self.subsample[0]),
                                                                      int(self.dataSize[1]*self.subsample[1])),
                                                         filter_shape=(self.outputFeatureDim,
@@ -87,6 +89,8 @@ class UpConv2d(N.Layer):
                                                         border_mode='valid',
                                                         subsample=self.subsample)
         return (y,)
+
+    predictForward = forward
 
     def forwardSize(self, inputsize):
         isize = inputsize[0]
@@ -132,11 +136,24 @@ class UpConv2d(N.Layer):
 
     def fillToObjMap(self):
         objDict = super(UpConv2d, self).fillToObjMap()
+        objDict['w'] = self.w
+        objDict['inputFeatureDim'] = self.inputFeatureDim
+        objDict['outputFeatureDim'] = self.outputFeatureDim
+        objDict['filterSize'] = self.filterSize
+        objDict['dataSize'] = self.dataSize
+        objDict['subsample'] = self.subsample
+
         return objDict
 
-    def loadFromObjMap(self, tmap):
-        super(UpConv2d, self).loadFromObjMap(tmap)
-        self.w = tmap['w']
+    def loadFromObjMap(self, objDict):
+        super(UpConv2d, self).loadFromObjMap(objDict)
+        self.w = objDict['w']
+        self.inputFeatureDim = objDict['inputFeatureDim']
+        self.outputFeatureDim = objDict['outputFeatureDim']
+        self.filterSize = objDict['filterSize']
+        self.dataSize = objDict['dataSize']
+        self.subsample = objDict['subsample']
+        return
 
     @classmethod
     def to_yaml(cls, dumper, data):
@@ -169,15 +186,15 @@ def test():
 
     network.setInput(N.RawInput((1, 28,28)))
     network.append(N.Conv2d(feature_map_multiplier=32))
-    network.append(N.Relu())
+    network.append(act.Relu())
     network.append(N.Pooling())
     network.append(N.Conv2d(feature_map_multiplier=2))
-    network.append(N.Relu())
+    network.append(act.Relu())
     network.append(N.Pooling())
     network.append(UpConv2d(feature_map_multiplier=2))
-    network.append(N.Relu())
+    network.append(act.Relu())
     network.append(UpConv2d(feature_map_multiplier=32))
-    network.append(N.Relu())
+    network.append(act.Relu())
     #network.append(N.Flatten())
     #network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
     #network.append(N.Relu())
@@ -205,6 +222,31 @@ def test():
         #print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
         network.train(trX, trX)
         print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
+
+    # the following is the piece to load model and predict a image.
+    #import mlbase.networkhelper as N
+    #import mlbase.cost as cost
+    #import theano.tensor as T
+    #import mlbase.loaddata as l
+    #from PIL import Image
+    #
+    #n = N.Network()
+    #n.loadFromFile('/hdd/home/yueguan/workspace/sesame-paste-noodle-dev/expdata/saved_model_LAST')
+    #n.costFunction = cost.ImageSSE
+    #n.inputOutputType = (T.tensor4(), T.tensor4(),)
+    #
+    #n.build(reload=True)
+    #
+    #trX, trY, teX, teY = l.load_mnist()
+    #result = n.predict(trX[0:1])
+    #result = (result > 0).astype(float)*255.0
+    #
+    #
+    #im = Image.fromarray(result[0][0])
+    #if im.mode != 'RGB':
+    #    im = im.convert('RGB')
+    #
+    #im.save('result.jpg')
 
 if __name__ == '__main__':
     test()
