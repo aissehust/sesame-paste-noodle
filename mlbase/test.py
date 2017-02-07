@@ -4,6 +4,7 @@ import numpy as np
 import mlbase.layers.activation as act
 import mlbase.loaddata as l
 from mlbase.layers import layer
+from mlbase.layers.rawinput import RawInput
 
 def test_seqlayer():
     network = N.Network()
@@ -17,7 +18,7 @@ def test_seqlayer():
             super().__init__()
             self.bases[0] = layer.Conv2d(feature_map_multiplier=feature_map_multiplier)
 
-    network.setInput(layer.RawInput((1, 28,28)))
+    network.setInput(RawInput((1, 28,28)))
             
     network.append(ConvNN(feature_map_multiplier=32))
     network.append(ConvNN(feature_map_multiplier=2))
@@ -46,7 +47,7 @@ def testload():
 def test_maxout():
     network = N.Network()
 
-    network.setInput(N.RawInput((1, 28,28)))
+    network.setInput(RawInput((1, 28,28)))
     network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=128))
     network.append(N.FeaturePooling(4))
     network.append(N.Pooling((2,2)))
@@ -72,7 +73,7 @@ def test_globalpooling():
     network = N.Network()
     network.debug = True
 
-    network.setInput(N.RawInput((1, 28,28)))
+    network.setInput(RawInput((1, 28,28)))
     network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=32))
     network.append(N.BatchNormalization())
     network.append(act.Relu())
@@ -109,7 +110,7 @@ def test5():
     network = N.Network()
     network.debug = True
 
-    network.setInput(N.RawInput((1, 28,28)))
+    network.setInput(RawInput((1, 28,28)))
     network.append(N.Conv2d(filter_size=(3,3), feature_map_multiplier=32))
     network.append(N.Relu())
     network.append(N.Pooling((2,2)))
@@ -148,7 +149,7 @@ def testbn():
 
     network.setSaveInterval(10)
 
-    network.setInput(N.RawInput((1, 28,28)))
+    network.setInput(RawInput((1, 28,28)))
     network.append(N.Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
     network.append(N.BatchNormalization())
     network.append(N.Relu())
@@ -188,7 +189,7 @@ def test():
     network = N.Network()
     network.debug = True
 
-    network.setInput(N.RawInput((28,28)))
+    network.setInput(RawInput((28,28)))
     network.append(N.Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
     network.append(N.Relu())
     network.append(N.Conv2d(filter_size=(2,2), input_feature=32, output_feature=32, subsample=(2,2),border='valid'))
@@ -227,7 +228,7 @@ def test4():
     network = N.Network()
     network.debug = True
 
-    network.setInput(N.RawInput((28,28)))
+    network.setInput(RawInput((28,28)))
     network.append(N.Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
     network.append(N.Relu())
     network.append(N.Conv2d(filter_size=(2,2), input_feature=32, output_feature=32, subsample=(2,2),border='valid'))
@@ -265,7 +266,7 @@ def test3():
     network = N.Network()
     network.debug = True
 
-    network.setInput(N.RawInput((28,28)))
+    network.setInput(RawInput((28,28)))
     network.append(N.Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
     network.append(N.Relu())
     network.append(N.Pooling((2,2)))
@@ -303,7 +304,7 @@ def test2():
     network = N.Network()
     network.debug = True
 
-    #network.setInput(N.RawInput((1, 28,28)))
+    #network.setInput(RawInput((1, 28,28)))
     #network.append(N.Conv2d(feature_map_multiplier=32))
     #network.append(act.Relu())
     #network.append(N.Pooling())
@@ -318,7 +319,7 @@ def test2():
     #network.append(act.Relu())
     #network.append(N.FullConn(input_feature=1152*2, output_feature=10))
     #network.append(N.SoftMax())
-    li = N.RawInput((1, 28,28))
+    li = RawInput((1, 28,28))
     network.setInput(li)
 
     lc1 = N.Conv2d(feature_map_multiplier=32)

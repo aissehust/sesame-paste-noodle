@@ -10,6 +10,7 @@ import mlbase.gradient_optimizer as opt
 import mlbase.regularization as reg
 import collections
 import mlbase.layers.layer as layer
+from mlbase.layers.rawinput import RawInput
 
         
 class Network(learner.SupervisedLearner):
@@ -172,7 +173,7 @@ class Network(learner.SupervisedLearner):
                 shouldStop = True
             else:
                 for yieldCandidate in openEndLayer:
-                    if issubclass(type(yieldCandidate), layer.RawInput) or \
+                    if issubclass(type(yieldCandidate), RawInput) or \
                        all([i in visitedLayer for i in yieldCandidate.inputLayer]):
                         yieldLayer = yieldCandidate
                         openEndLayer.remove(yieldCandidate)
@@ -201,7 +202,7 @@ class Network(learner.SupervisedLearner):
             if self.debug:
                 print('Building for: {}'.format(layer.debugname))
 
-            if issubclass(type(layer), layer.RawInput):
+            if issubclass(type(layer), RawInput):
                 buildBuffer[layer] = (layer.forwardSize([]), layer.forward((self.X,)), layer.predictForward((self.X,)))
                 continue
 
@@ -361,7 +362,7 @@ class Network(learner.SupervisedLearner):
         allLayer = {}
         for layer in yaml.load_all(istream):
             allLayer[layer.saveName] = layer
-            if issubclass(type(layer), layer.RawInput):
+            if issubclass(type(layer), RawInput):
                 self.setInput(layer, reload=True)
 
         # TODO: consider there are multiple input layer
