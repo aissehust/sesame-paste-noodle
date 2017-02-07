@@ -5,18 +5,19 @@ import mlbase.layers.activation as act
 import mlbase.loaddata as l
 from mlbase.layers import layer
 from mlbase.layers.rawinput import RawInput
+from mlbase.layers.conv import Conv2d
 
 def test_seqlayer():
     network = N.Network()
     network.debug = True
 
     class ConvNN(layer.Layer, metaclass=layer.SeqLayer,
-                 seq=[layer.Conv2d, act.Relu, layer.Pooling],
+                 seq=[Conv2d, act.Relu, layer.Pooling],
                  yaml_tag=u'!ConvNN',
                  type_name='ConvNN'):
         def __init__(self, feature_map_multiplier=1):
             super().__init__()
-            self.bases[0] = layer.Conv2d(feature_map_multiplier=feature_map_multiplier)
+            self.bases[0] = Conv2d(feature_map_multiplier=feature_map_multiplier)
 
     network.setInput(RawInput((1, 28,28)))
             

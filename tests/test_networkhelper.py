@@ -4,6 +4,7 @@ import theano.tensor as T
 import mlbase.network as N
 import mlbase.layers as layer
 import unittest
+from mlbase.layers.conv import Conv2d
 
 rng = np.random.RandomState(1111)
 def floatX(X):
@@ -19,7 +20,7 @@ class TestConv2d(unittest.TestCase):
     
     def test_conv2d_forwardSize(self):
         x = [(100, 1, 28, 28)]
-        conv2d = layer.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         y = conv2d.forwardSize(x)
         self.assertEqual(y, [(100, 20, 28, 28)])
     
@@ -36,7 +37,7 @@ class TestConv2d(unittest.TestCase):
         self.assertEqual(y_shape, (500, 20, 28, 28))
         
     def test_conv2d_forward2(self):
-        conv2d = layer.Conv2d(filter_size=(3,3), feature_map_multiplier=20)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
         size = conv2d.forwardSize([(500, 1 ,28, 28)])
 
@@ -49,7 +50,7 @@ class TestConv2d(unittest.TestCase):
         self.assertEqual(y_shape, (500, 20, 28, 28))
         
     def test_conv2d_dropconnect(self):
-        conv2d = layer.Conv2d(filter_size=(3,3), feature_map_multiplier=20, dc=0.5)
+        conv2d = Conv2d(filter_size=(3,3), feature_map_multiplier=20, dc=0.5)
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1 ,28, 28)))
         
         size = conv2d.forwardSize([(500, 1 ,28, 28)])       
