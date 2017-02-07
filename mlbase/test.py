@@ -7,13 +7,14 @@ from mlbase.layers import layer
 from mlbase.layers.rawinput import RawInput
 from mlbase.layers.conv import Conv2d
 from mlbase.layers import compose
+from mlbase.layers import pooling
 
 def test_seqlayer():
     network = N.Network()
     network.debug = True
 
     class ConvNN(layer.Layer, metaclass=compose.SeqLayer,
-                 seq=[Conv2d, act.Relu, layer.Pooling],
+                 seq=[Conv2d, act.Relu, pooling.Pooling],
                  yaml_tag=u'!ConvNN',
                  type_name='ConvNN'):
         def __init__(self, feature_map_multiplier=1):

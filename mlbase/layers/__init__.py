@@ -5,3 +5,4 @@ from .resnet import *
 from .rawinput import *
 from .conv import *
 from .compose import *
+from .pooling import *
