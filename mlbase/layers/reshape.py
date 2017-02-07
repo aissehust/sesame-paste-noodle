@@ -3,6 +3,10 @@ import theano.tensor as T
 from .layer import Layer
 from .layer import layerhelper
 
+__all__ = [
+    'Flatten',
+]
+
 @layerhelper
 class Flatten(Layer):
     debugname = 'Flatten'

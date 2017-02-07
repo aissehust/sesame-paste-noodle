@@ -6,6 +6,12 @@ from .layer import layerhelper
 
 # the class Dropout refers https://github.com/Lasagne/Lasagne/blob/master/lasagne/layers/noise.py
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+
+__all__ = [
+    'Dropout',
+]
+
+
 class Dropout(Layer):
 
     debugname = 'dropout'

@@ -6,6 +6,10 @@ import theano.tensor as T
 import mlbase.init as winit
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
+__all__ = [
+    'FullConn',
+]
+
 @layerhelper
 class FullConn(Layer):
 

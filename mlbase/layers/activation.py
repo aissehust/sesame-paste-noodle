@@ -5,6 +5,21 @@ import numpy as np
 from mlbase.util import floatX
 from mlbase.layers.layer import layerhelper
 
+__all__ = [
+    'NonLinear',
+    'Relu',
+    'ConcatenatedReLU',
+    'Sine',
+    'Cosine',
+    'ConcatenatedSin',
+    'AbsoluteValue',
+    'Triangle',
+    'Sine2',
+    'Cosine2',
+    'Sine3',
+    'Cosine3',
+]
+
 
 @layerhelper
 class NonLinear(layer.Layer):

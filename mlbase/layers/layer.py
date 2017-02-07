@@ -3,6 +3,10 @@ import theano
 import theano.tensor as T
 import numpy as np
 
+__all__ = [
+    'Layer',
+    'layerhelper',
+]
 
 class Layer(yaml.YAMLObject):
     

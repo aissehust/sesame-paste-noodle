@@ -5,6 +5,10 @@ import theano.tensor.nnet as nnet
 from mlbase.layers import layer
 from mlbase.util import floatX
 
+__all__ = [
+    'UpConv2d',
+]
+
 class UpConv2d(layer.Layer):
     """
     Theano explanation of the ops can be found at:

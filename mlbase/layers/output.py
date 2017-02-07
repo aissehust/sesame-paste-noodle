@@ -3,6 +3,10 @@ from .layer import layerhelper
 import theano
 import theano.tensor as T
 
+__all__ = [
+    'SoftMax',
+]
+
 @layerhelper
 class SoftMax(Layer):
     debugname = 'softmax'

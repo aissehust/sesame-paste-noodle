@@ -1,5 +1,10 @@
 from .layer import Layer
 
+__all__ = [
+    'MoreIn',
+    'MoreOut',
+]
+
 class MoreIn(Layer):
     """
     Combine more than one input to form a output.

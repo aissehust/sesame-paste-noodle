@@ -4,6 +4,12 @@ import theano
 import theano.tensor as T
 from theano.tensor.signal.pool import pool_2d
 
+__all__ = [
+    'Pooling',
+    'GlobalPooling',
+    'FeaturePooling',
+]
+
 @layerhelper
 class Pooling(Layer):
     debugname = 'pooling'

@@ -1,5 +1,9 @@
 import yaml
 
+__all__ = [
+    'SeqLayer',
+]
+
 
 class SeqLayer(yaml.YAMLObjectMetaclass):
     def __new__(cls, name, bases, namespace, **kwds):

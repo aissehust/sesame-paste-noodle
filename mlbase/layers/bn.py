@@ -5,6 +5,10 @@ from .layer import Layer
 from .layer import layerhelper
 from ..util import floatX
 
+__all__ = [
+    'BatchNormalization',
+]
+
 @layerhelper
 class BatchNormalization(Layer):
     

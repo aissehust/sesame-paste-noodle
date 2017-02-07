@@ -7,6 +7,10 @@ import mlbase.init as winit
 from  mlbase.util import floatX
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
+__all__ = [
+    'Conv2d',
+]
+
 @layerhelper
 class Conv2d(Layer):
 

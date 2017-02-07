@@ -4,6 +4,10 @@ import theano.tensor as T
 import sys
 from mlbase.layers import layer
 
+__all__ = [
+    'ResLayer',
+]
+
 theano.gof.optdb.max_use_ratio=20.0
 sys.setrecursionlimit(10000)
 

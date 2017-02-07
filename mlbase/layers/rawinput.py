@@ -1,5 +1,9 @@
 from .layer import Layer
 
+__all__ = [
+    'RawInput',
+]
+
 
 class RawInput(Layer):
     """
