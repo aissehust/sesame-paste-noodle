@@ -6,12 +6,13 @@ import mlbase.loaddata as l
 from mlbase.layers import layer
 from mlbase.layers.rawinput import RawInput
 from mlbase.layers.conv import Conv2d
+from mlbase.layers import compose
 
 def test_seqlayer():
     network = N.Network()
     network.debug = True
 
-    class ConvNN(layer.Layer, metaclass=layer.SeqLayer,
+    class ConvNN(layer.Layer, metaclass=compose.SeqLayer,
                  seq=[Conv2d, act.Relu, layer.Pooling],
                  yaml_tag=u'!ConvNN',
                  type_name='ConvNN'):
