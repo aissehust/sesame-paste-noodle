@@ -12,6 +12,41 @@ from mlbase.layers import reshape
 from mlbase.layers import fullconn
 from mlbase.layers import output
 
+def test_unet():
+    n = N.Network()
+
+    def unet_dag():
+        x1 = compose.X
+        y1 = act.Relu(Conv2d(act.Relu(Conv2d(x1))))
+        x2 = pooling.Pooling(y1)
+        y2 = act.Relu(Conv2d(act.Relu(Conv2d(x2))))
+        x3 = pooling.Pooling(y2)
+        y3 = act.Relu(Conv2d(act.Relu(Conv2d(x3))))
+        x4 = y2 // conv.UpConv2d(y3)
+        y4 = act.Relu(Conv2d(act.Relu(Conv2d(x4))))
+        x5 = y1 // conv.UpConv2d(y4)
+        y5 = act.Relu(Conv2d(act.Relu(Conv2d(x5))))
+        return y5
+
+    class UNet(layer.Layer, metaclass=compose.DAG,
+               dag=unet_dag()
+               yaml_tag=u'!UNet',
+               type_name='UNet')
+
+    network.setInput(RawInput((1, 28,28)))
+    network.append(ConvNN(feature_map_multiplier=32))
+
+    n.append(UNet())
+
+    n.build()
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))    
+
 def test_seqlayer():
     network = N.Network()
     network.debug = True
