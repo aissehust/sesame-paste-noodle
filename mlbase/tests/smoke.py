@@ -38,14 +38,18 @@ def test_unet():
 
     n.append(UNet())
 
+    n.costFunction = cost.ImageDice
+    n.inputOutputType = (T.tensor4(), T.tensor4(),)
+
     n.build()
 
     trX, trY, teX, teY = l.load_mnist()
 
     for i in range(5000):
         print(i)
-        network.train(trX, trY)
-        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))    
+        network.train(trX, trX)
+        print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
+
 
 def test_seqlayer():
     network = N.Network()

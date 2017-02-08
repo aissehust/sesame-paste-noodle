@@ -117,6 +117,14 @@ class Layer(yaml.YAMLObject):
         """
         return
 
+
+    def __new__(cls, dagPlan=None):
+        if dagPlan is None:
+            return super().__new__(cls)
+        else:
+            return cls.updateTag(dagPlan)
+
+
 def layerhelper(cls):
     if hasattr(cls, 'predictForward') and cls.predictForward == Layer.predictForward:
         setattr(cls, 'predictForward', cls.forward)
