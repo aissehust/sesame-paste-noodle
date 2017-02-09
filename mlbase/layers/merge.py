@@ -1,8 +1,11 @@
+import theano
+import theano.tensor as T
 from .layer import Layer
 
 __all__ = [
     'MoreIn',
     'MoreOut',
+    'Concat'
 ]
 
 class MoreIn(Layer):
@@ -70,5 +73,46 @@ class MoreOut(Layer):
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
         ret = MoreOut()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+class Concat(MoreIn):
+    """
+    T.concatenate(inputs, axis)
+    """
+    LayerTypeName = 'Concat'
+    yaml_tag = u'!Concat'
+
+    def __init__(self, axis=0):
+        super().__init__()
+        self.axis = axis
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        T.concatenate(inputs, axis=self.axis)
+
+    forwardSize = forward
+
+    def fillToObjMap(self):
+        objDict = super(Concat, self).fillToObjMap()
+        objDict['axis'] = self.axis
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Concat, self).loadFromObjMap(tmap)
+        self.axis = tmap['axis']
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Concat.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Concat()
         ret.loadFromObjMap(obj_dict)
         return ret
