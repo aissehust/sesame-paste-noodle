@@ -11,27 +11,35 @@ from mlbase.layers import pooling
 from mlbase.layers import reshape
 from mlbase.layers import fullconn
 from mlbase.layers import output
+from mlbase.layers import merge
+from mlbase.layers import generative
 
 def test_unet():
     n = N.Network()
 
     def unet_dag():
-        x1 = compose.X
+        x1 = compose.DAGPlan.input()
         y1 = act.Relu(Conv2d(act.Relu(Conv2d(x1))))
         x2 = pooling.Pooling(y1)
         y2 = act.Relu(Conv2d(act.Relu(Conv2d(x2))))
         x3 = pooling.Pooling(y2)
         y3 = act.Relu(Conv2d(act.Relu(Conv2d(x3))))
-        x4 = y2 // conv.UpConv2d(y3)
+        #x4 = y2 // conv.UpConv2d(y3)
+        x4 = merge.MoreIn(y2, generative.UpConv2d(y3))
         y4 = act.Relu(Conv2d(act.Relu(Conv2d(x4))))
-        x5 = y1 // conv.UpConv2d(y4)
+        #x5 = y1 // conv.UpConv2d(y4)
+        x5 = merge.MoreIn(y1, generative.UpConv2d(y4))
         y5 = act.Relu(Conv2d(act.Relu(Conv2d(x5))))
         return y5
 
+    dagplan = unet_dag()
+    dagplan.printDAG()
+
     class UNet(layer.Layer, metaclass=compose.DAG,
-               dag=unet_dag()
+               dag=dagplan,
                yaml_tag=u'!UNet',
-               type_name='UNet')
+               type_name='UNet'):
+        pass
 
     network.setInput(RawInput((1, 28,28)))
     network.append(ConvNN(feature_map_multiplier=32))
@@ -460,4 +468,4 @@ if __name__ == "__main__":
     #test_maxout()
     #test2()
     test_seqlayer()
-
+    #test_unet()
