@@ -1,3 +1,5 @@
+import theano
+import theano.tensor as T
 import mlbase.network as N
 import h5py
 import numpy as np
@@ -11,8 +13,9 @@ from mlbase.layers import pooling
 from mlbase.layers import reshape
 from mlbase.layers import fullconn
 from mlbase.layers import output
-from mlbase.layers import merge
+from mlbase.layers import Concat
 from mlbase.layers import generative
+import mlbase.cost as cost
 
 def test_unet():
     n = N.Network()
@@ -25,10 +28,10 @@ def test_unet():
         x3 = pooling.Pooling(y2)
         y3 = act.Relu(Conv2d(act.Relu(Conv2d(x3))))
         #x4 = y2 // conv.UpConv2d(y3)
-        x4 = merge.MoreIn(y2, generative.UpConv2d(y3))
+        x4 = Concat(y2, generative.UpConv2d(y3))
         y4 = act.Relu(Conv2d(act.Relu(Conv2d(x4))))
         #x5 = y1 // conv.UpConv2d(y4)
-        x5 = merge.MoreIn(y1, generative.UpConv2d(y4))
+        x5 = Concat(y1, generative.UpConv2d(y4))
         y5 = act.Relu(Conv2d(act.Relu(Conv2d(x5))))
         return y5
 
@@ -41,9 +44,7 @@ def test_unet():
                type_name='UNet'):
         pass
 
-    network.setInput(RawInput((1, 28,28)))
-    network.append(ConvNN(feature_map_multiplier=32))
-
+    n.setInput(RawInput((1, 28,28)))
     n.append(UNet())
 
     n.costFunction = cost.ImageDice
@@ -467,5 +468,5 @@ def test1():
 if __name__ == "__main__":
     #test_maxout()
     #test2()
-    test_seqlayer()
-    #test_unet()
+    #test_seqlayer()
+    test_unet()
