@@ -73,16 +73,17 @@ class Conv2d(Layer):
             return (l3conv, )
         
     def forwardSize(self, inputsize):
-        # [size1, size2, size3], size: (32,1,28,28)
-        # print("conv2d.size: {}, {}, {}".format(inputsize,self.mapMulti, self.inputFeature))
         isize = inputsize[0]
 
         if len(isize) != 4:
-            raise IndexError
-        if self.mapMulti is None and isize[1] != self.inputFeature:
-            raise IndexError
+            raise AssertionError('Conv input size should has a lenght of 4')
+        if self.inputFeature is not None and isize[1] != self.inputFeature:
+            raise AssertionError('Conv put feature map size does not match')
 
-        if self.mapMulti is not None:
+        if self.outputFeature is not None:
+            self.inputFeature = isize[1]
+            self.mapMulti = self.outputFeature / self.inputFeature
+        elif self.mapMulti is not None:
             self.inputFeature = isize[1]
             self.outputFeature = int(self.inputFeature*self.mapMulti)
 

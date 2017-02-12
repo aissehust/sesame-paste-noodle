@@ -16,6 +16,7 @@ from mlbase.layers import output
 from mlbase.layers import Concat
 from mlbase.layers import generative
 import mlbase.cost as cost
+from skimage.measure import block_reduce
 
 def test_unet():
     n = N.Network()
@@ -44,21 +45,34 @@ def test_unet():
                type_name='UNet'):
         pass
 
-    n.setInput(RawInput((1, 28,28)))
+    #n.setInput(RawInput((1, 28,28)))
+    n.setInput(RawInput((1, 210, 290)))
+    n.append(Conv2d(feature_map_multiplier=16))
+    n.append(act.Relu())
     n.append(UNet())
+    n.append(Conv2d(output_feature=1))
 
-    #n.costFunction = cost.ImageDice
-    n.costFunction = cost.ImageSSE
+    n.costFunction = cost.ImageDice
+    #n.costFunction = cost.ImageSSE
     n.inputOutputType = (T.tensor4(), T.tensor4(),)
 
     n.build()
 
-    trX, trY, teX, teY = l.load_mnist()
+    #trX, trY, teX, teY = l.load_mnist()
+    trX, trY, teX = l.load_kaggle_ultrasound()
+
+    trX = block_reduce(trX, block_size=(1,1,2,2), func=np.mean)
+    trY = block_reduce(trY, block_size=(1,1,2,2), func=np.mean)
+    teX = block_reduce(teX, block_size=(1,1,2,2), func=np.mean)
+
+    trX = trX/255.0
+    trY = trY/255.0
+    teX = teX/255.0
 
     for i in range(5000):
         print(i)
         n.train(trX, trX)
-        print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
+        #print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
 
 
 def test_seqlayer():

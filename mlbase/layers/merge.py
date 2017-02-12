@@ -86,9 +86,10 @@ class Concat(MoreIn):
     LayerTypeName = 'Concat'
     yaml_tag = u'!Concat'
 
-    def __init__(self, axis=1):
+    def __init__(self, axis=1, padding_or_chop=True):
         super().__init__()
         self.axis = axis
+        self.padding = True
 
     def getpara(self):
         return []
