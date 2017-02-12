@@ -19,8 +19,11 @@ class MoreIn(Layer):
     def __init__(self):
         pass
 
-    def __str__(self):
-        return 'moreIn'
+    def getExtraPara(self, inputtensor):
+        """
+        Parameters that are not in the collection for updating by backpropagation.
+        """
+        return []
 
     def fillToObjMap(self):
         objDict = super(MoreIn, self).fillToObjMap()
@@ -83,7 +86,7 @@ class Concat(MoreIn):
     LayerTypeName = 'Concat'
     yaml_tag = u'!Concat'
 
-    def __init__(self, axis=0):
+    def __init__(self, axis=1):
         super().__init__()
         self.axis = axis
 
@@ -91,9 +94,21 @@ class Concat(MoreIn):
         return []
 
     def forward(self, inputtensor):
-        T.concatenate(inputs, axis=self.axis)
+        return (T.concatenate(inputtensor, axis=self.axis),)
 
-    forwardSize = forward
+    predictForward = forward
+
+    def forwardSize(self, inputsize):
+        if not all([len(isize) == len(inputsize[0])  for isize in inputsize]):
+            raise AssertionError('Concat need all input have the same size')
+
+        outaxissize = 0
+        for isize in inputsize:
+            outaxissize += isize[self.axis]
+
+        ret = list(inputsize[0])
+        ret[self.axis] = outaxissize
+        return (ret,)
 
     def fillToObjMap(self):
         objDict = super(Concat, self).fillToObjMap()

@@ -113,11 +113,12 @@ class DAG(yaml.YAMLObjectMetaclass):
             return allpara
         result.getpara = getpara
 
-        def getExtraPara(selfc):
+        def getExtraPara(selfc, inputtensor):
             allpara = []
             for item in selfc.objdag.nextNode():
                 if item.layer is not None:
-                    allpara += item.layer.getExtraPara()
+                    allpara += item.layer.getExtraPara(inputtensor)
+
             return allpara
         result.getExtraPara = getExtraPara
 
@@ -128,6 +129,7 @@ class DAG(yaml.YAMLObjectMetaclass):
                 if item.layer is not None:
                     if all([hasattr(il, 'tensor') for il in item.previous]):
                         tmpinputtensor = []
+
                         for il in item.previous:
                             tmpinputtensor += il.tensor
                         item.tensor = item.layer.forward(tmpinputtensor)
@@ -172,6 +174,7 @@ class DAG(yaml.YAMLObjectMetaclass):
                 if item.layer is not None:
                     if all([hasattr(il, 'tensor') for il in item.previous]):
                         tmpinputtensor = []
+                            
                         for il in item.previous:
                             tmpinputtensor += il.tensor
                         item.tensor = item.layer.forwardSize(tmpinputtensor)
@@ -184,7 +187,7 @@ class DAG(yaml.YAMLObjectMetaclass):
                     ret = item.tensor
             for item in selfc.objdag.nextNode():
                 delattr(item, 'tensor')
-            
+
             return ret
         result.forwardSize = forwardSize
 

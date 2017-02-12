@@ -232,7 +232,7 @@ class Network(learner.SupervisedLearner):
             currentPredictTensor = layer.predictForward(allInputPredictTensor)
 
             buildBuffer[layer] = (currentSize, currentTensor, currentPredictTensor)
-            
+
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
 

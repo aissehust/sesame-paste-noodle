@@ -35,7 +35,7 @@ class UpConv2d(layer.Layer):
     def __init__(self, filter_size=(2,2),
                  input_feature_map_dim=None,
                  output_feature_map_dim=None,
-                 feature_map_multiplier=None,
+                 feature_map_multiplier=1,
                  subsample=(2,2),border='valid'):
         """
         The default configureation will upsample input by 2x2 for each feature map.

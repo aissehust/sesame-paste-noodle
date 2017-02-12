@@ -36,7 +36,7 @@ def test_unet():
         return y5
 
     dagplan = unet_dag()
-    dagplan.printDAG()
+    #dagplan.printDAG()
 
     class UNet(layer.Layer, metaclass=compose.DAG,
                dag=dagplan,
@@ -47,7 +47,8 @@ def test_unet():
     n.setInput(RawInput((1, 28,28)))
     n.append(UNet())
 
-    n.costFunction = cost.ImageDice
+    #n.costFunction = cost.ImageDice
+    n.costFunction = cost.ImageSSE
     n.inputOutputType = (T.tensor4(), T.tensor4(),)
 
     n.build()
@@ -56,7 +57,7 @@ def test_unet():
 
     for i in range(5000):
         print(i)
-        network.train(trX, trX)
+        n.train(trX, trX)
         print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
 
 

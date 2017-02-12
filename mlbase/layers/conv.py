@@ -20,7 +20,7 @@ class Conv2d(Layer):
     
     def __init__(self, filter_size=(3,3),
                  input_feature=None, output_feature=None,
-                 feature_map_multiplier=None,
+                 feature_map_multiplier=1,
                  subsample=(1,1), border='half', need_bias=False, dc=0.0):
         """
         This 2d convolution deals with 4d tensor:
