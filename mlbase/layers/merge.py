@@ -17,6 +17,7 @@ class MoreIn(Layer):
     yaml_tag = u'!MoreIn'
 
     def __init__(self):
+        super().__init__()
         pass
 
     def getExtraPara(self, inputtensor):

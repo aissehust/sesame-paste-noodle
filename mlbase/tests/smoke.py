@@ -37,7 +37,6 @@ def test_unet():
         return y5
 
     dagplan = unet_dag()
-    #dagplan.printDAG()
 
     class UNet(layer.Layer, metaclass=compose.DAG,
                dag=dagplan,
@@ -45,29 +44,27 @@ def test_unet():
                type_name='UNet'):
         pass
 
-    #n.setInput(RawInput((1, 28,28)))
-    n.setInput(RawInput((1, 210, 290)))
-    n.append(Conv2d(feature_map_multiplier=16))
+    n.setInput(RawInput((1, 420, 580)))
+    n.append(Conv2d(feature_map_multiplier=4))
     n.append(act.Relu())
     n.append(UNet())
     n.append(Conv2d(output_feature=1))
 
+    n.batchSize = 32
     n.costFunction = cost.ImageDice
-    #n.costFunction = cost.ImageSSE
     n.inputOutputType = (T.tensor4(), T.tensor4(),)
 
     n.build()
-
-    #trX, trY, teX, teY = l.load_mnist()
+    
     trX, trY, teX = l.load_kaggle_ultrasound()
 
-    trX = block_reduce(trX, block_size=(1,1,2,2), func=np.mean)
-    trY = block_reduce(trY, block_size=(1,1,2,2), func=np.mean)
-    teX = block_reduce(teX, block_size=(1,1,2,2), func=np.mean)
+    #trX = block_reduce(trX, block_size=(1,1,2,2), func=np.mean)
+    #trY = block_reduce(trY, block_size=(1,1,2,2), func=np.mean)
+    #teX = block_reduce(teX, block_size=(1,1,2,2), func=np.mean)
 
-    trX = trX/255.0
-    trY = trY/255.0
-    teX = teX/255.0
+    trX = trX[:]/255.0
+    trY = trY[:]/255.0
+    teX = teX[:]/255.0
 
     for i in range(5000):
         print(i)
