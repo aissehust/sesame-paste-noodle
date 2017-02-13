@@ -86,10 +86,9 @@ class Concat(MoreIn):
     LayerTypeName = 'Concat'
     yaml_tag = u'!Concat'
 
-    def __init__(self, axis=1, padding=True):
+    def __init__(self, axis=1):
         super().__init__()
         self.axis = axis
-        self.padding = padding
 
     def getpara(self):
         return []
@@ -103,16 +102,9 @@ class Concat(MoreIn):
         if not all([len(isize) == len(inputsize[0])  for isize in inputsize]):
             raise AssertionError('Concat need all input have the same size')
 
-        needpadding = False
         for isize in inputsize:
             if not all([s1[1][0] == s1[1][1] for s1 in enumerate(zip(inputsize[0], isize)) if s1[0] != self.axis]):
-                #raise AssertionError('need padding/croping {}'.format(inputsize))
-                needpadding = True
-
-        if needpadding:
-            sample = inputsize[0]
-            for isize in inputsize:
-                
+                raise AssertionError('need padding/croping {}'.format(inputsize))
 
         outaxissize = 0
         for isize in inputsize:
