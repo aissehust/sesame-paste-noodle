@@ -11,3 +11,4 @@ from .noise import *
 from .reshape import *
 from .fullconn import *
 from .output import *
+from .merge import *

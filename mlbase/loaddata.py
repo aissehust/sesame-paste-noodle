@@ -120,3 +120,13 @@ def load_timofte():
         imgf = os.path.join(training, imgn)
         img = misc.imread(imgf)
         img = np.rollaxis(img, 2)
+
+def load_kaggle_ultrasound():
+    datapath = '/hdd/home/largedata/ultrasound/ultrasound.hdf5'
+
+    h5f = h5py.File(datapath, 'r')
+    trX = h5f['trX']
+    trY = h5f['trY']
+    teX = h5f['teX']
+
+    return trX, trY, teX

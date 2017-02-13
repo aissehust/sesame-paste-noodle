@@ -89,7 +89,7 @@ class ImageDice(ImageDiff):
     """
     @staticmethod
     def cost(Y, tY):
-        # TODO
-        return
+        ret = T.sum(Y * tY) * 2 / (T.sum(Y) + T.sum(tY))
+        return ret
 
 

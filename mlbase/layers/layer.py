@@ -2,6 +2,7 @@ import yaml
 import theano
 import theano.tensor as T
 import numpy as np
+from .interface.dag import *
 
 __all__ = [
     'Layer',
@@ -116,6 +117,26 @@ class Layer(yaml.YAMLObject):
         Load this layer from yaml
         """
         return
+
+    def __new__(cls, *args, **kwds):
+        if len(args) > 0 and  all([isinstance(arg, DAGBase) for arg in args]):
+            cdag = args[0].__class__()
+
+            header = args[0].header
+            if not all([arg.header == header for arg in args]):
+                raise AssertionError('Input dag should have the same header')
+            cdag.header = header
+
+            for arg in args:
+                cdag.previous.append(arg)
+                arg.next.append(cdag)
+                cdag.layer = cls
+
+            return cdag
+        else:
+            return super().__new__(cls)
+
+
 
 def layerhelper(cls):
     if hasattr(cls, 'predictForward') and cls.predictForward == Layer.predictForward:
