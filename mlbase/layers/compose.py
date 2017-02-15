@@ -2,6 +2,7 @@ import yaml
 import collections
 from .merge import *
 from .interface.dag import *
+import abc
 
 __all__ = [
     'SeqLayer',
@@ -9,8 +10,12 @@ __all__ = [
     'DAG',
 ]
 
+class DAGPlanMeta(abc.ABCMeta, yaml.YAMLObjectMetaclass):
+    pass
 
-class DAGPlan(DAGBase):
+class DAGPlan(DAGBase, yaml.YAMLObject, metaclass=DAGPlanMeta):
+    yaml_tag = u'!DAGPlan'
+    
     def __init__(self):
         self.header = self
         self.previous = []
@@ -53,14 +58,21 @@ class DAGPlan(DAGBase):
     def deepcopy(self):
         copynodes = {}
 
+        newheader = None
         for item in self.nextNode():
-            copynodes[item] = item.copy()
+            newitem = item.copy()
+            if newheader is None:
+                newheader = newitem
+            copynodes[item] = newitem
 
         for item in self.nextNode():
             for pnode in item.previous:
                 copynodes[item].previous.append(copynodes[pnode])
             for nnode in item.next:
                 copynodes[item].next.append(copynodes[nnode])
+
+        for item in self.nextNode():
+            copynodes[item].header = newheader
 
         return copynodes[self.header]
 
@@ -84,8 +96,31 @@ class DAGPlan(DAGBase):
             #output += item.layer.__name__ + '\n'
             #output += '{}'.format(item.layer) + '\n'
         return output
-            
 
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        #objdict = data.fillToObjMap()
+        objdict = {}
+        objdict['header'] = data.header
+        objdict['previous'] = data.previous
+        objdict['nextn'] = data.next
+        objdict['layer'] = data.layer
+        node = dumper.represent_mapping(cls.yaml_tag, objdict)
+        return node
+            
+    @classmethod
+    def from_yaml(cls, loader, node):
+        objdict = loader.construct_mapping(node)
+        ret = DAGPlan()
+        #ret.loadFromObjMap(objdict)
+        ret.header = objdict['header']
+        ret.previous = objdict['previous']
+        ret.next = objdict['nextn']
+        ret.layer = objdict['layer']
+        return ret
+
+
+    
 
 class DAG(yaml.YAMLObjectMetaclass):
     def __new__(cls, name, bases, namespace, **kwds):
@@ -194,14 +229,15 @@ class DAG(yaml.YAMLObjectMetaclass):
         # save and load stuff
         def fillToObjMap(selfc):
             objDict = super(result, selfc).fillToObjMap()
-            objDict['dag'] = selfc.dag
+            # don't save the class, saving class cause a lots of trouble'
+            # recover the class from the instance instead.
+            # objDict['obj'] = selfc.dag
             objDict['objdag'] = selfc.objdag
             return objDict
         result.fillToObjMap = fillToObjMap
 
         def loadFromObjMap(selfc, tmap):
             super(result, selfc).loadFromObjMap(tmap)
-            selfc.dag = tmap['dag']
             selfc.objdag = tmap['objdag']
             return
         result.loadFromObjMap = loadFromObjMap
