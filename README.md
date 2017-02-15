@@ -1,9 +1,7 @@
-# super-engine
-
-[![Build Status](https://travis-ci.org/aissehust/sesame-paste-noodle.svg?branch=master)](https://travis-ci.org/aissehust/sesame-paste-noodle)
-
 Sesame-Paste-Noodle(SPN)
 ===================
+
+[![Build Status](https://travis-ci.org/aissehust/sesame-paste-noodle.svg?branch=master)](https://travis-ci.org/aissehust/sesame-paste-noodle)
 
 SPN is a library to build and train deep networks based on Theano.
 Its main features are:
@@ -17,8 +15,7 @@ Its main features are:
 Installation
 ------------
 
-.. code-block:: bash
-  pip install https://github.com/aissehust/sesame-paste-noodle/archive/master.zip
+    pip install https://github.com/aissehust/sesame-paste-noodle/archive/master.zip
 
 Documentation
 -------------
