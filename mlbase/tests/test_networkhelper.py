@@ -64,7 +64,7 @@ class TestConv2d(unittest.TestCase):
         for x in range(w_number):
             if abs(new_w[x]) == 0:
                 counter=counter+1
-        self.assertEqual(round(counter/w_number,1), conv2d.dc)
+        self.assertTrue(abs(round(counter/w_number,1)-conv2d.dc) < 0.2)
 
 class TestPooling(unittest.TestCase):
     
