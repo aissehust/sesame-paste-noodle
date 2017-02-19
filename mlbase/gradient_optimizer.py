@@ -48,7 +48,8 @@ class Adam(GradientOptimizer):
     def __call__(self, cost, params):
         grads = T.grad(cost=cost ,wrt=params)
         updates = []
-        exp = theano.shared(value=1,name='exp',borrow=True)
+        exp = theano.shared(np.float32(1.0),name='exp',borrow=True)
+        updates.append((exp, exp+1))
         for p, g in zip(params, grads):
             m = theano.shared(p.get_value() * 0.)
             v = theano.shared(p.get_value() * 0.)
@@ -56,7 +57,6 @@ class Adam(GradientOptimizer):
             v_new = self.beta2 * v + (1 - self.beta2) * g**2
             mt = m_new / (1 - self.beta1**exp)
             vt = v_new / (1 - self.beta2**exp)
-            updates.append((exp, exp+1))
             updates.append((m, m_new))
             updates.append((v, v_new))
             updates.append((p, p - self.lr * mt / (T.sqrt(vt) + self.epsilon)))
