@@ -8,6 +8,7 @@ from mlbase.layers.layer import layerhelper
 __all__ = [
     'NonLinear',
     'Relu',
+    'Elu',
     'ConcatenatedReLU',
     'Sine',
     'Cosine',
@@ -26,9 +27,6 @@ class NonLinear(layer.Layer):
     LayerTypeName = 'NonLinear'
     yaml_tag = u'!NonLinear'
     
-    def __str__(self):
-        return ret
-
     def fillToObjMap(self):
         objDict = super(NonLinear, self).fillToObjMap()
         return objDict
@@ -90,6 +88,46 @@ class Relu(NonLinear):
     def from_yaml(cls, loader, node):
         obj_dict = loader.construct_mapping(node)
         ret = Relu()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+@layerhelper
+class Elu(NonLinear):
+    debugname = 'elu'
+    LayerTypeName = 'Elu'
+    yaml_tag = u'!Elu'
+
+    def __init__(self, alpha=1.0):
+        super(Elu, self).__init__()
+        self.alpha = alpha
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        inputimage = inputtensor[0]
+        return (T.switch(T.gt(inputimage, 0), inputimage, self.alpha*(T.exp(inputimage) - 1)),)
+
+    def forwardSize(self, inputsize):
+        return inputsize
+
+    def fillToObjMap(self):
+        objDict = super(Elu, self).fillToObjMap()
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Elu, self).loadFromObjMap(tmap)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Elu.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Elu()
         ret.loadFromObjMap(obj_dict)
         return ret
 
