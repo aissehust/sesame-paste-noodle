@@ -5,7 +5,8 @@ from .layer import Layer
 __all__ = [
     'MoreIn',
     'MoreOut',
-    'Concat'
+    'Concat',
+    'CropConcat',
 ]
 
 class MoreIn(Layer):
@@ -113,6 +114,107 @@ class Concat(MoreIn):
 
         ret = list(inputsize[0])
         ret[self.axis] = outaxissize
+        return (ret,)
+
+    def fillToObjMap(self):
+        objDict = super(Concat, self).fillToObjMap()
+        objDict['axis'] = self.axis
+        return objDict
+
+    def loadFromObjMap(self, tmap):
+        super(Concat, self).loadFromObjMap(tmap)
+        self.axis = tmap['axis']
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        obj_dict = data.fillToObjMap()
+        node = dumper.represent_mapping(Concat.yaml_tag, obj_dict)
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        obj_dict = loader.construct_mapping(node)
+        ret = Concat()
+        ret.loadFromObjMap(obj_dict)
+        return ret
+
+class CropConcat(MoreIn):
+    """
+    CropConcat
+    """
+    LayerTypeName = 'CropConcat'
+    yaml_tag = u'!CropConcat'
+
+    def __init__(self, axis=1):
+        super().__init__()
+        self.axis = axis
+        
+        self.leftPlan = None
+        self.rightPlan = None
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        leftT = inputtensor[0][self.leftPlan]
+        rightT = inputtensor[1][self.rightPlan]
+            
+        return (T.concatenate([leftT, rightT], axis=self.axis),)
+
+    predictForward = forward
+
+    def forwardSize(self, inputsize):
+        if len(inputsize) != 2:
+            raise AssertionError('CropConcat only support two inputs {}'.format(inputsize))
+
+        if inputsize[0][0] != inputsize[1][0]:
+            raise AssertionError('CropConcat with two input of different batch size {}'.format(inputsize))
+
+        if not all([len(i) == 4 for i in inputsize]):
+            raise AssertionError('CropConcat only support tensor with 4 dimension {}'.format(inputsize))
+
+        outaxissize = 0
+        for isize in inputsize:
+            outaxissize += isize[self.axis]
+
+        self.leftPlan = []
+        self.rightPlan = []
+        ret = []
+        for i in range(4):
+            if i == 0:
+                self.leftPlan.append(slice(None))
+                self.rightPlan.append(slice(None))
+                ret.append(inputsize[0][i])
+            elif i == self.axis:
+                self.leftPlan.append(slice(None))
+                self.rightPlan.append(slice(None))
+                ret.append(sum([isize[i] for isize in inputsize]))
+            else:
+                if inputsize[0][i] > inputsize[1][i]:
+                    cropHead = (inputsize[0][i] - inputsize[1][i]) // 2
+                    cropShift = (inputsize[0][i] - inputsize[1][i]) % 2
+                    if cropShift == 0:
+                        self.leftPlan.append(slice(cropHead, -cropHead))
+                        self.rightPlan.append(slice(None))
+                    else:
+                        self.leftPlan.append(slice(cropHead, -cropHead-1))
+                        self.rightPlan.append(slice(None))
+                    ret.append(inputsize[1][i])
+                elif inputsize[0][i] < inputsize[1][i]:
+                    cropHead = (inputsize[1][i] - inputsize[0][i]) // 2
+                    cropShift = (inputsize[1][i] - inputsize[0][i]) % 2
+                    if cropShift == 0:
+                        self.leftPlan.append(slice(None))
+                        self.rightPlan.append(slice(cropHead, -cropHead))
+                    else:
+                        self.leftPlan.append(slice(None))
+                        self.rightPlan.append(slice(cropHead, -cropHead-1))
+                    ret.append(inputsize[0][i])
+                else:
+                    self.leftPlan.append(slice(None))
+                    self.rightPlan.append(slice(None))
+                    ret.append(inputsize[0][i])
+
         return (ret,)
 
     def fillToObjMap(self):

@@ -5,16 +5,7 @@ import h5py
 import numpy as np
 import mlbase.layers.activation as act
 import mlbase.loaddata as l
-from mlbase.layers import layer
-from mlbase.layers.rawinput import RawInput
-from mlbase.layers.conv import Conv2d
-from mlbase.layers import compose
-from mlbase.layers import pooling
-from mlbase.layers import reshape
-from mlbase.layers import fullconn
-from mlbase.layers import output
-from mlbase.layers import Concat
-from mlbase.layers import generative
+from mlbase.layers import *
 import mlbase.cost as cost
 from skimage.measure import block_reduce
 
@@ -22,31 +13,31 @@ def test_unet():
     n = N.Network()
 
     def unet_dag():
-        x1 = compose.DAGPlan.input()
-        y1 = act.Relu(Conv2d(act.Relu(Conv2d(x1))))
-        x2 = pooling.Pooling(y1)
-        y2 = act.Relu(Conv2d(act.Relu(Conv2d(x2))))
-        x3 = pooling.Pooling(y2)
-        y3 = act.Relu(Conv2d(act.Relu(Conv2d(x3))))
+        x1 = DAGPlan.input()
+        y1 = Relu(Conv2d(Relu(Conv2d(x1))))
+        x2 = Pooling(y1)
+        y2 = Relu(Conv2d(Relu(Conv2d(x2))))
+        x3 = Pooling(y2)
+        y3 = Relu(Conv2d(Relu(Conv2d(x3))))
         #x4 = y2 // conv.UpConv2d(y3)
-        x4 = Concat(y2, generative.UpConv2d(y3))
-        y4 = act.Relu(Conv2d(act.Relu(Conv2d(x4))))
+        x4 = CropConcat(y2, UpConv2d(y3))
+        y4 = Relu(Conv2d(Relu(Conv2d(x4))))
         #x5 = y1 // conv.UpConv2d(y4)
-        x5 = Concat(y1, generative.UpConv2d(y4))
-        y5 = act.Relu(Conv2d(act.Relu(Conv2d(x5))))
+        x5 = CropConcat(y1, UpConv2d(y4))
+        y5 = Relu(Conv2d(Relu(Conv2d(x5))))
         return y5
 
     dagplan = unet_dag()
 
-    class UNet(layer.Layer, metaclass=compose.DAG,
+    class UNet(Layer, metaclass=DAG,
                dag=dagplan,
                yaml_tag=u'!UNet',
                type_name='UNet'):
         pass
 
-    n.setInput(RawInput((1, 420, 580)))
+    n.setInput(RawInput((1, 420//2, 580//2)))
     n.append(Conv2d(feature_map_multiplier=4))
-    n.append(act.Relu())
+    n.append(Relu())
     n.append(UNet())
     n.append(Conv2d(output_feature=1))
 
@@ -55,12 +46,12 @@ def test_unet():
     n.inputOutputType = (T.tensor4(), T.tensor4(),)
 
     n.build()
-    
+
     trX, trY, teX = l.load_kaggle_ultrasound()
 
-    #trX = block_reduce(trX, block_size=(1,1,2,2), func=np.mean)
-    #trY = block_reduce(trY, block_size=(1,1,2,2), func=np.mean)
-    #teX = block_reduce(teX, block_size=(1,1,2,2), func=np.mean)
+    trX = block_reduce(trX, block_size=(1,1,2,2), func=np.mean)
+    trY = block_reduce(trY, block_size=(1,1,2,2), func=np.mean)
+    teX = block_reduce(teX, block_size=(1,1,2,2), func=np.mean)
 
     trX = trX[:]/255.0
     trY = trY[:]/255.0
@@ -68,7 +59,8 @@ def test_unet():
 
     for i in range(5000):
         print(i)
-        n.train(trX, trX)
+        n.train(trX, trX[:,:,:208, :288])
+        #n.train(trX, trX)
         #print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
 
 
@@ -478,7 +470,4 @@ def test1():
         print(1 - np.mean(np.argmax(teY, axis=1) == network.predict(teX)))
 
 if __name__ == "__main__":
-    #test_maxout()
-    #test2()
-    #test_seqlayer()
     test_unet()

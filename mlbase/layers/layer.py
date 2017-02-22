@@ -119,7 +119,10 @@ class Layer(yaml.YAMLObject):
         return
 
     def __new__(cls, *args, **kwds):
-        if len(args) > 0 and  all([isinstance(arg, DAGBase) for arg in args]):
+        """
+        Support DAGPlan in compose.py
+        """
+        if len(args) > 0 and all([isinstance(arg, DAGBase) for arg in args]):
             cdag = args[0].__class__()
 
             header = args[0].header
@@ -131,6 +134,8 @@ class Layer(yaml.YAMLObject):
                 cdag.previous.append(arg)
                 arg.next.append(cdag)
                 cdag.layer = cls
+
+            cdag.kwds = kwds
 
             return cdag
         else:
