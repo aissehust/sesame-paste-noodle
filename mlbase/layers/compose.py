@@ -1,6 +1,5 @@
 import yaml
 import collections
-from .merge import *
 from .interface.dag import *
 import abc
 
@@ -20,7 +19,8 @@ class DAGPlan(DAGBase, yaml.YAMLObject, metaclass=DAGPlanMeta):
         self.header = self
         self.previous = []
         self.next = []
-        self.layer = None
+        self.layer = None # this is either class or instance.
+        self.kwds = None # save kwds for use when create instance.
 
     @classmethod
     def input(cls):
