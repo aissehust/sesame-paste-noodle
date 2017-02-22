@@ -38,6 +38,9 @@ class Network(learner.SupervisedLearner):
     
         self.X = T.tensor4()
         self.Y = T.matrix()
+        self.inputSizeChecker = {}
+        self.outputSizeChecker = {}
+        
         self.params = []
         self.costFunc = cost.CrossEntropy
         self.gradientOpt = opt.RMSprop()
@@ -46,7 +49,7 @@ class Network(learner.SupervisedLearner):
         self.learner = None
         self.predicter = None
 
-        self.cost = None # local variable
+        self.cost = None # local variable (tensor)
 
         self.nonlinear = None
 
@@ -125,6 +128,10 @@ class Network(learner.SupervisedLearner):
         inputLayer.setBatchSize(self.batchsize)
         self.inputLayers.append(inputLayer)
         self.currentLayer = inputLayer
+
+        self.inputSizeChecker = inputLayer.forwardSize(None)[0]
+
+        return
     
     def append(self, layer, reload=False):
         if self.debug:
@@ -237,6 +244,7 @@ class Network(learner.SupervisedLearner):
                 extraUpdates.append(extraUpdatesPair)
 
         lastTriple = buildBuffer.popitem()
+        self.outputSizeChecker = lastTriple[1][0][0]
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 
@@ -254,6 +262,16 @@ class Network(learner.SupervisedLearner):
                                          outputs=currentPredictTensor[0], allow_input_downcast=True)
 
     def train(self, X, Y):
+        for di in range(len(X.shape)):
+            print(di)
+            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+
+        for di in range(len(Y.shape)):
+            print(di)
+            if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
+                raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
+            
         headindex = list(range(0, len(X), self.batchsize))
         tailindex = list(range(self.batchsize, len(X), self.batchsize))
         if len(headindex) > len(tailindex):
@@ -276,6 +294,10 @@ class Network(learner.SupervisedLearner):
                 self.lastSaveAbsolutePath = newSavedFile
 
     def predict(self, X):
+        for di in range(len(X.shape)):
+            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+                    
         startIndex = 0
         retY = None
         endFlag = False

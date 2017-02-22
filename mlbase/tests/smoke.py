@@ -35,7 +35,7 @@ def test_unet():
                type_name='UNet'):
         pass
 
-    n.setInput(RawInput((1, 420/2, 580/2)))
+    n.setInput(RawInput((1, 420//2, 580//2)))
     n.append(Conv2d(feature_map_multiplier=4))
     n.append(Relu())
     n.append(UNet())
@@ -60,6 +60,7 @@ def test_unet():
     for i in range(5000):
         print(i)
         n.train(trX, trX[:,:,:208, :288])
+        #n.train(trX, trX)
         #print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
 
 
