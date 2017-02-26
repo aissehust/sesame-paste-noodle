@@ -263,12 +263,10 @@ class Network(learner.SupervisedLearner):
 
     def train(self, X, Y):
         for di in range(len(X.shape)):
-            print(di)
             if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
                 raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
 
         for di in range(len(Y.shape)):
-            print(di)
             if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
                 raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
             
