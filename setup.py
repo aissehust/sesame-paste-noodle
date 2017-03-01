@@ -8,6 +8,10 @@ install_requires = [
     'h5py',
 ]
 
+tests_require = [
+    'pytest',
+]
+
 setup(
     name="TheFramework",
     version="0.0.1",
