@@ -1,0 +1,4 @@
+theano
+h5py
+pyyaml
+pytest

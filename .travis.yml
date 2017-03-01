@@ -17,14 +17,11 @@ before_install:
 
 install:
   - /usr/bin/g++ --version
-  - pip install theano
-  - pip install h5py
-  - pip install pyyaml
+  - pip install -r requirement.txt
+  - pip install -e .
 
 script:
-  - python -m unittest mlbase/tests/test_generative.py
-  - python -m unittest mlbase/tests/test_networkhelper.py
-  - python -m unittest mlbase/tests/test_sgd_opt.py
+  - pytest mlbase/tests
 
 cache:
   - apt
