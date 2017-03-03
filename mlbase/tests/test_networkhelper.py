@@ -131,6 +131,7 @@ class TestFullConn(unittest.TestCase):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1000)))
         x = theano.shared(x,borrow = True)
         fc = layer.FullConn(input_feature=1000, output_feature=10)
+        fc.forwardSize([(500, 1000)])
         y = fc.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))
@@ -139,6 +140,7 @@ class TestFullConn(unittest.TestCase):
         x = np.asarray(rng.uniform(low=-1, high=1, size=(500, 1000)))
         x = theano.shared(x,borrow = True)
         fc = layer.FullConn(input_feature=1000, output_feature=10, dc=0.5)
+        fc.forwardSize([(500, 1000)])
         y = fc.forward([x])
 
         w_shape = fc.w.eval().shape
