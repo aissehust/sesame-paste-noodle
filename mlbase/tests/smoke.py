@@ -469,5 +469,24 @@ def test1():
         network.train(trX, trY)
         print(1 - np.mean(np.argmax(teY, axis=1) == network.predict(teX)))
 
+def test_mlp():
+    n = N.Network()
+
+    n.setInput(RawInput((1, 28, 28)))
+    n.append(Flatten())    
+    n.append(FullConn(feature_map_multiplier=2))
+    n.append(Elu())
+    n.append(FullConn(output_feature=10))
+    n.append(output.SoftMax())
+
+    n.build()
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(100):
+        print(i)
+        n.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
+
 if __name__ == "__main__":
-    test_unet()
+    test_mlp()

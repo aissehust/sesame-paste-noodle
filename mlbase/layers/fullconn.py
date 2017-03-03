@@ -17,25 +17,19 @@ class FullConn(Layer):
     LayerTypeName = 'FullConn'
     yaml_tag = u'!FullConn'
     
-    def __init__(self, times=None, output=None, input_feature=None, output_feature=None,
+    def __init__(self,
+                 input_feature=None, output_feature=None,
+                 feature_map_multiplier=1,
                  need_bias=False, dc=0.0):
         super(FullConn, self).__init__()
-        if times is not None:
-            self.times = times
-        if output is not None:
-            self.output = output
 
-        weightIniter = winit.XavierInit()
-        initweight = weightIniter.initialize((input_feature, output_feature))
-        self.w = theano.shared(initweight, borrow=True)
-        initbias = np.zeros((output_feature,))
-        self.b = theano.shared(initbias, borrow=True)
+        self.w = None
+        self.b = None
 
         self.inputFeature = input_feature
         self.outputFeature = output_feature
+        self.mapMulti = feature_map_multiplier
         
-        self.times = -1
-        self.output = -1
         self.need_bias = need_bias
         self.dc = dc
 
@@ -72,11 +66,23 @@ class FullConn(Layer):
 
         if len(isize) != 2:
             raise IndexError('Expect input dimension 2, get ' + str(len(isize)))
-        if isize[1] != self.inputFeature:
+        if self.inputFeature is not None and isize[1] != self.inputFeature:
             raise IndexError('Input size: ' +
                              str(isize[1]) +
                              ' is not equal to given input feature dim: ' +
                              str(self.inputFeature))
+
+        if self.inputFeature is None:
+            self.inputFeature = isize[1]
+
+        if self.outputFeature is None:
+            self.outputFeature = self.inputFeature * self.mapMulti
+
+        weightIniter = winit.XavierInit()
+        initweight = weightIniter.initialize((self.inputFeature, self.outputFeature))
+        self.w = theano.shared(initweight, borrow=True)
+        initbias = np.zeros((self.outputFeature,))
+        self.b = theano.shared(initbias, borrow=True)
 
         return [(isize[0], self.outputFeature,)]
 
