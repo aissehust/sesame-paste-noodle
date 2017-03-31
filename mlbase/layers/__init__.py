@@ -12,3 +12,8 @@ from .reshape import *
 from .fullconn import *
 from .output import *
 from .merge import *
+from .r_fullconn import *
+from .r_fullconn2 import *
+from .rfc_no_out import *
+from .rfc_no_in import *
+

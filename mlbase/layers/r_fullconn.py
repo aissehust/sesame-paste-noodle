@@ -50,7 +50,7 @@ class R_fullConn(Layer):
         self.output = -1
 
     def getpara(self):
-        return (self.w, self.b, self.hw, self.hb)
+        return (self.w, self.b, self.xw, self.hw, self.hb)
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
