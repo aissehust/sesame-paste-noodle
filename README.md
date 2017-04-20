@@ -17,9 +17,11 @@ Installation
 
     pip install https://github.com/aissehust/sesame-paste-noodle/archive/master.zip
 
-Documentation
--------------
+Development Setup
+-----------------
 
-Example
--------
-
+    virtualenv ENV
+    . ENV/bin/activate
+    git clone https://github.com/aissehust/sesame-paste-noodle.git
+    cd sesame-paste-noodle
+    pip install -e .
