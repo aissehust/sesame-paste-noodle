@@ -37,7 +37,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'sphinx.ext.linkcode',
-    'numpydoc',
+    #'numpydoc',
 ]
 
 mathjax_path = ('https://cdn.mathjax.org/mathjax/latest/MathJax.js?'
