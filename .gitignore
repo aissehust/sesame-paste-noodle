@@ -46,3 +46,5 @@ script/python/__pycache__/
 script/python/theano-example/mnist
 TheFramework.egg-info/
 expdata
+docs/_build
+.cache
