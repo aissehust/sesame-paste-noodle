@@ -6,11 +6,25 @@
 Welcome to SPN's documentation!
 ===============================
 
+SPN is library to build, train and save neural networks based on Theano.
+
+SPN defines a neural network image on hard disk to reuse and modify.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
 
+API Reference
+-------------
+
+The following is the document extracted from code.
+
+.. toctree::
+   :maxdepth: 2
+
+   modules/layers      
+	     
 
 Indices and tables
 ==================
