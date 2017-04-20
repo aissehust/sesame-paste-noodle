@@ -23,7 +23,7 @@ The following is the document extracted from code.
 .. toctree::
    :maxdepth: 2
 
-   modules/layers      
+   modules/layers
 	     
 
 Indices and tables

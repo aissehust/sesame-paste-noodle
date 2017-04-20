@@ -6,5 +6,5 @@ Network input
 .. currentmodule:: mlbase.layers
 
 .. autoclass:: RawInput
-	       :members:
+   :members:
 							

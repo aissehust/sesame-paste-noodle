@@ -8,6 +8,8 @@ __all__ = [
 class RawInput(Layer):
     """
     This is THE INPUT Class. Class type is checked during network building.
+
+    
     """
 
     debugname = 'RawInput'
