@@ -2,6 +2,7 @@ Sesame-Paste-Noodle(SPN)
 ===================
 
 [![Build Status](https://travis-ci.org/aissehust/sesame-paste-noodle.svg?branch=master)](https://travis-ci.org/aissehust/sesame-paste-noodle)
+[![Documentation Status](https://readthedocs.org/projects/sesame-paste-noodle/badge/?version=latest)](http://sesame-paste-noodle.readthedocs.io/en/latest/?badge=latest)))]]
 
 SPN is a library to build and train deep networks based on Theano.
 Its main features are:
