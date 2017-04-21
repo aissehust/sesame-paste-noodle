@@ -83,9 +83,7 @@ class ImageDice(ImageDiff):
     Y is the set of salient pixel in one binary image
     tY is another set of salient pixel in the other binary image.
     The Dice coefficient is:
-    2 * |Y ^ tY|
-    ------------
-     |Y| + |tY|
+    2 * \|Y ^ tY\| / (\|Y\| + \|tY\|)
     """
     @staticmethod
     def cost(Y, tY):
