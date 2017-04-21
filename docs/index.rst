@@ -23,7 +23,12 @@ The following is the document extracted from code.
 .. toctree::
    :maxdepth: 2
 
+   modules/network	      
    modules/layers
+   modules/cost
+   modules/gradient_optimizer
+   modules/regularization
+   modules/util
 	     
 
 Indices and tables

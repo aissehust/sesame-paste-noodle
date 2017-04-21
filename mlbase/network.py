@@ -22,14 +22,14 @@ class Network(learner.SupervisedLearner):
         self.reset()
 
     def reset(self):
-        self.batchsize = 128
-
         """
         For sequential layerout network, use append()
         to add more layers, the first layer is set with setInput().
         Network can do this, because it remember which layer to append to 
         by using member variable currentLayer.
         """
+        self.batchsize = 128
+        
         self.currentLayer = None
         self.inputLayers = []
         #layers = []

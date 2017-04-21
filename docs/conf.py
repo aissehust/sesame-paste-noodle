@@ -36,10 +36,19 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
-    #'sphinx.ext.linkcode',
+    'sphinx.ext.linkcode',
     #'numpydoc',
     'sphinx.ext.napoleon',
 ]
+
+def linkcode_resolve(domain, info):
+    if domain != 'py':
+        return None
+    if not info['module']:
+        return None
+
+    filename = info['module'].replace('.', '/')
+    return "https://github.com/aissehust/sesame-paste-noodle/tree/master/{}.py".format(filename)
 
 mathjax_path = ('https://cdn.mathjax.org/mathjax/latest/MathJax.js?'
                 'config=TeX-AMS-MML_HTMLorMML')

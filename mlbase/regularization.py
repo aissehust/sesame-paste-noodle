@@ -2,12 +2,21 @@ import theano
 import theano.tensor as T
 
 def l1(x):
+    """
+    L1 penalty
+    """
     return T.sum(abs(x))
 
 def l2(x):
+    """
+    L2 penalty
+    """
     return T.sum(x**2)
 
 class Regulator:
+    """
+    Regulator added to cost function.
+    """
     def __init__(self, weight_decay=0.0005, reg_func=l2):
         self.weightDecay = weight_decay
         self.regulateFunc = reg_func
