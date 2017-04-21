@@ -48,7 +48,6 @@ def linkcode_resolve(domain, info):
         return None
 
     filename = info['module'].replace('.', '/')
-    print("debug: {}".format(filename))
     return "https://github.com/aissehust/sesame-paste-noodle/tree/master/{}.py".format(filename)
 
 mathjax_path = ('https://cdn.mathjax.org/mathjax/latest/MathJax.js?'

@@ -9,7 +9,10 @@ class RawInput(Layer):
     """
     This is THE INPUT Class. Class type is checked during network building.
 
-    
+    Parameters
+    ----------
+    input : tuple or list of inte
+            Input shape without batch size.
     """
 
     debugname = 'RawInput'
