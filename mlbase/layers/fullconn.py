@@ -57,6 +57,13 @@ class FullConn(Layer):
             return ((T.dot(inputimage, self.w)+self.b), )
         else:
             return (T.dot(inputimage, self.w),)
+            
+    def predictForward(self, inputtensor):
+        inputimage = inputtensor[0]
+        if self.need_bias:
+            return ((T.dot(inputimage, self.w)+self.b), )
+        else:
+            return (T.dot(inputimage, self.w),)
 
     def forwardSize(self, inputsize):
 

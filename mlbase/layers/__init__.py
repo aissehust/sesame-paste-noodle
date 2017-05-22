@@ -12,3 +12,10 @@ from .reshape import *
 from .fullconn import *
 from .output import *
 from .merge import *
+from .rnn import *
+from .bi_rnn import *
+from .lstm import *
+from .bi_lstm import *
+from .gru import *
+from .bi_gru import *
+
