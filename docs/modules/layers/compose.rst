@@ -2,11 +2,15 @@
 
 .. currentmodule:: mlbase.layers
 
-.. autoclass:: SeqLayer
-   :members:
+
+.. autoclass:: DAGPlanMeta
+   :members:      
 
 .. autoclass:: DAGPlan
    :members:      
 
 .. autoclass:: DAG
    :members:      
+
+.. autoclass:: SeqLayer
+   :members:

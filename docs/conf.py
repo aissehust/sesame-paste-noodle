@@ -48,7 +48,8 @@ def linkcode_resolve(domain, info):
         return None
 
     filename = info['module'].replace('.', '/')
-    return "https://github.com/aissehust/sesame-paste-noodle/tree/master/{}.py".format(filename)
+    #return "https://github.com/aissehust/sesame-paste-noodle/tree/master/{}.py".format(filename)
+    return "https://github.com/juanshoutian/sesame-paste-noodle/blob/master/{}.py".format(filename)
 
 mathjax_path = ('https://cdn.mathjax.org/mathjax/latest/MathJax.js?'
                 'config=TeX-AMS-MML_HTMLorMML')

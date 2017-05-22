@@ -26,7 +26,7 @@
 
 
 
-.. rubric:: :doc:`layers/activation`
+.. rubric:: :doc:`tests/activation`
 
 .. autosummary::
     :nosignatures:

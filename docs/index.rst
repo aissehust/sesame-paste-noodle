@@ -13,8 +13,8 @@ SPN defines a neural network image on hard disk to reuse and modify.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-
+   
+   
 API Reference
 -------------
 
@@ -29,6 +29,13 @@ The following is the document extracted from code.
    modules/gradient_optimizer
    modules/regularization
    modules/util
+   modules/tests
+   modules/binary
+   modules/binaryresultinspection
+   modules/init
+   modules/learner
+   modules/loaddata
+   modules/scheduling
 	     
 
 Indices and tables
