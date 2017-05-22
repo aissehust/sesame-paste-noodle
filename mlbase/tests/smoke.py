@@ -9,6 +9,27 @@ from mlbase.layers import *
 import mlbase.cost as cost
 from skimage.measure import block_reduce
 
+def rnn_mnist():
+    network = N.Network()
+    network.debug = True
+    network.learningRate = 0.01
+    network.setInput(RawInput((1, 28,28)))
+    network.append(conv.Conv2d(filter_size=(3,3), feature_map_multiplier=32, need_bias=True))
+    network.append(Relu())
+    network.append(pooling.Pooling((2,2)))
+    network.append(reshape.Flatten())
+    network.append(r_fullconn.R_fullConn(input_feature=6272, h_num=500, output_feature=10))
+    network.append(output.SoftMax())
+    network.build()
+
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
+
 def test_unet():
     n = N.Network()
 
@@ -489,4 +510,4 @@ def test_mlp():
         print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
 
 if __name__ == "__main__":
-    test_mlp()
+    rnn_mnist()

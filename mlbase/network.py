@@ -203,6 +203,7 @@ class Network(learner.SupervisedLearner):
 
         self.params = []
         extraUpdates = []
+        extraCosts = 0
         buildBuffer = collections.OrderedDict()
         
         for layer in self.nextLayer():
@@ -242,13 +243,17 @@ class Network(learner.SupervisedLearner):
 
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
-
+                
+            extraCosts += layer.getExtraCost()
+            
         lastTriple = buildBuffer.popitem()
         self.outputSizeChecker = lastTriple[1][0][0]
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 
         self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0], self.Y))
+        self.cost += extraCosts
+
         if self.regulator is not None:
             self.cost = self.regulator.addPenalty(self.cost, self.params)
         updates = self.gradientOpt(self.cost, self.params)

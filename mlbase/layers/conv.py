@@ -71,7 +71,18 @@ class Conv2d(Layer):
             return ((l3conv+self.b.dimshuffle('x', 0, 'x', 'x')), )
         else:
             return (l3conv, )
-        
+    
+    def predictForward(self, inputtensor):
+        inputimage = inputtensor[0]
+        l3conv = T.nnet.conv2d(inputimage,
+                               self.w,
+                               border_mode=self.border,
+                               subsample=self.subsample)
+        if self.need_bias:            
+            return ((l3conv+self.b.dimshuffle('x', 0, 'x', 'x')), )
+        else:
+            return (l3conv, )
+    
     def forwardSize(self, inputsize):
         isize = inputsize[0]
 
