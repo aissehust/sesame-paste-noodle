@@ -291,7 +291,7 @@ class Network(learner.SupervisedLearner):
                     os.remove(self.lastSaveAbsolutePath)
                 self.lastSaveAbsolutePath = newSavedFile
 
-    def predict(self, X, stub=None):
+    def predict(self, X, stub=None, watcher=None):
         for di in range(len(X.shape)):
             if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
                 raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
@@ -315,6 +315,8 @@ class Network(learner.SupervisedLearner):
                 break
             startIndex += self.batchSize
 
+        
+        
         return retY
 
     # The following stuff are for saving and loading
