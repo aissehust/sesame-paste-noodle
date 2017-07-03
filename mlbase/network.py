@@ -200,6 +200,10 @@ class Network(learner.SupervisedLearner):
         return ret
 
     def build(self, reload=False):
+        """
+        Build the training function and predict function
+        after collecting all the necessary information.
+        """
 
         self.params = []
         extraUpdates = []
@@ -210,7 +214,9 @@ class Network(learner.SupervisedLearner):
                 print('Building for: {}'.format(layer.debugname))
 
             if issubclass(type(layer), RawInput):
-                buildBuffer[layer] = (layer.forwardSize([]), layer.forward((self.X,)), layer.predictForward((self.X,)))
+                buildBuffer[layer] = (layer.forwardSize([]),
+                                      layer.forward((self.X,)),
+                                      layer.predictForward((self.X,)))
                 continue
 
             currentSize = None
@@ -248,7 +254,8 @@ class Network(learner.SupervisedLearner):
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 
-        self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0], self.Y))
+        self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0],
+                                                      self.Y))
         if self.regulator is not None:
             self.cost = self.regulator.addPenalty(self.cost, self.params)
         updates = self.gradientOpt(self.cost, self.params)
@@ -257,9 +264,12 @@ class Network(learner.SupervisedLearner):
             updates.append(extraUpdatesPair)
 
         self.learner = theano.function(inputs=[self.X, self.Y],
-                                       outputs=self.cost, updates=updates, allow_input_downcast=True)
+                                       outputs=self.cost,
+                                       updates=updates,
+                                       allow_input_downcast=True)
         self.predicter = theano.function(inputs=[self.X],
-                                         outputs=currentPredictTensor[0], allow_input_downcast=True)
+                                         outputs=currentPredictTensor[0],
+                                         allow_input_downcast=True)
 
     def train(self, X, Y):
         for di in range(len(X.shape)):
