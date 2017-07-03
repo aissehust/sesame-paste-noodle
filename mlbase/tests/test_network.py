@@ -3,7 +3,10 @@ import theano.tensor as T
 import mlbase.network as N
 import numpy as np
 
-def test_predict():
+def test_predictBatchSize():
+    """
+    Test batch size works for perdictor.
+    """
     n = N.Network()
     n.batchSize = 2
 
@@ -27,4 +30,38 @@ def test_predict():
     assert (ty == n.predict(tx)).all()
     assert (ty[:(tlen-1),:] == n.predict(tx[:(tlen-1),:])).all()
 
-    
+
+def test_predictWithIntermediaResult():
+    """
+    Test to see we can see intermediate result after each layer.
+    """
+
+    @layerhelper
+    class Linear2d(Layer):
+        def __init__(self):
+            pass
+
+        def forwardSize(self, inputsize):
+            isize = inputsize[0]
+            return ((isize[0], 2,))
+
+        def predictForward(self. inputtensor):
+            pass
+        
+    n = N.Network()
+    n.setInput(RawInput((2)))
+    n.append(Linear2d(), "output1")
+    n.append(Linear2d(), "output2")
+
+    n.build()
+
+    tx = np.array([[ 1.38921142,  0.57967604],
+                   [-0.56795221,  1.38135903],
+                   [-0.30971383, -1.06001774],
+                   [-1.70132043,  1.78895373],
+                   [-0.59605122,  0.8748537 ],
+                   [-0.05554206, -0.62843449]])
+    ty = tx
+
+    assert (np.abs(ty - n.predict(tx)) < 0.001).all()
+
