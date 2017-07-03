@@ -133,7 +133,7 @@ class Network(learner.SupervisedLearner):
 
         return
     
-    def append(self, layer, reload=False):
+    def append(self, layer, reload=False, tag=None):
         if self.debug:
             print("Append {} to {}".format(layer.debugname, self.currentLayer.debugname))
 
@@ -291,7 +291,7 @@ class Network(learner.SupervisedLearner):
                     os.remove(self.lastSaveAbsolutePath)
                 self.lastSaveAbsolutePath = newSavedFile
 
-    def predict(self, X):
+    def predict(self, X, stub=None):
         for di in range(len(X.shape)):
             if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
                 raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))

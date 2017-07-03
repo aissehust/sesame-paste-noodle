@@ -488,5 +488,27 @@ def test_mlp():
         n.train(trX, trY)
         print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
 
+def test_show_internal():
+    n = N.Network()
+
+    n.setInput(RawInput((1, 28, 28)))
+    n.append(Flatten(), "flatten")
+    n.append(FullConn(feature_map_multiplier=2), "fc1")
+    n.append(Elu(), "layer1")
+    n.append(FullConn(output_feature=10), "fc2")
+    n.append(output.SoftMax(), "layer2")
+
+    n.build()
+
+    trX, trY, teX, teY = l.load_mnist()
+
+    for i in range(100):
+        print(i)
+        n.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
+
+    n.predict(teX, stub=["layer1", "layer2"])
+    
+
 if __name__ == "__main__":
     test_mlp()
