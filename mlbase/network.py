@@ -165,6 +165,7 @@ class Network(learner.SupervisedLearner):
     def nextLayer(self):
         """
         Use this method to iterate over all known layers.
+        This is a DAG walker.
         """
         visitedLayer = {}
         openEndLayer = collections.deque()
@@ -198,6 +199,16 @@ class Network(learner.SupervisedLearner):
         for l in self.nextLayer():
             ret[l.name] = l
         return ret
+
+    def buildPredict(self, reload=False):
+        for layer in self.nextLayer():
+            if self.debug:
+                print('Building for: {}'.format(layer.debugname))
+
+
+
+    def buildTrain(self, reload=False):
+        pass
 
     def build(self, reload=False):
         """
@@ -440,9 +451,3 @@ class Network(learner.SupervisedLearner):
             ret += layer.__str__() + '\n'
 
         return ret
-
-def test():
-    pass
-
-if __name__ == '__main__':
-    test()

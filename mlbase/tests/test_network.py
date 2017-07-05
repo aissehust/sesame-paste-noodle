@@ -2,6 +2,7 @@ import theano
 import theano.tensor as T
 import mlbase.network as N
 import numpy as np
+from mlbase.layers import *
 
 def test_predictBatchSize():
     """
@@ -36,22 +37,36 @@ def test_predictWithIntermediaResult():
     Test to see we can see intermediate result after each layer.
     """
 
-    @layerhelper
     class Linear2d(Layer):
         def __init__(self):
-            pass
+            super(Linear2d, self).__init__()
 
         def forwardSize(self, inputsize):
             isize = inputsize[0]
-            return ((isize[0], 2,))
+            return [(isize[0], 2,)]
 
-        def predictForward(self. inputtensor):
-            pass
+    class Linear2da(Linear2d):
+        def __init__(self):
+            super(Linear2da, self).__init__()
+            self.w = theano.shared(np.array([[1, 2],[3, 4]]), borrow=True)
+                
+        def predictForward(self, inputtensor):
+            inputimage = inputtensor[0]
+            return (T.dot(inputimage, self.w),)
+
+    class Linear2db(Linear2d):
+        def __init__(self):
+            super(Linear2db, self).__init__()
+            self.w = theano.shared(np.array([[-2.0, 1.0],[1.5, -0.5]]), borrow=True)
+            
+        def predictForward(self, inputtensor):
+            inputimage = inputtensor[0]
+            return (T.dot(inputimage, self.w),)
         
     n = N.Network()
-    n.setInput(RawInput((2)))
-    n.append(Linear2d(), "output1")
-    n.append(Linear2d(), "output2")
+    n.setInput(RawInput((2,)))
+    n.append(Linear2da(), "output1")
+    n.append(Linear2db(), "output2")
 
     n.build()
 
@@ -64,4 +79,5 @@ def test_predictWithIntermediaResult():
     ty = tx
 
     assert (np.abs(ty - n.predict(tx)) < 0.001).all()
+
 
