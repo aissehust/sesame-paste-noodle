@@ -23,8 +23,9 @@ class Network(learner.SupervisedLearner):
 
     def reset(self):
         """
-        For sequential layerout network, use append()
-        to add more layers, the first layer is set with setInput().
+        For sequential layerout network, use append().
+        
+        To add more layers, the first layer is set with setInput().
         Network can do this, because it remember which layer to append to 
         by using member variable currentLayer.
         """
@@ -149,7 +150,9 @@ class Network(learner.SupervisedLearner):
         return
 
     def connect(self, prelayer, nextlayer, reload=False):
-            
+        """
+        Connect prelayer to nextlayer.
+        """
         if not reload:
             layerCounter = self.layerNextCounter()
             nextlayer.name = nextlayer.LayerTypeName + layerCounter

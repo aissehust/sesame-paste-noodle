@@ -4,6 +4,46 @@ import mlbase.network as N
 import numpy as np
 from mlbase.layers import *
 
+def test_nextLayer():
+    n = N.Network()
+
+    n.setInput(RawInput((1, 28, 28)))
+    n.append(Flatten())
+    n.append(FullConn(feature_map_multiplier=2))
+    n.append(Elu())
+    n.append(FullConn(output_feature=10))
+    n.append(output.SoftMax())
+
+    g = n.nextLayer()
+    assert issubclass(type(next(g)), RawInput)
+    assert issubclass(type(next(g)), Flatten)
+    assert issubclass(type(next(g)), FullConn)
+    assert issubclass(type(next(g)), Elu)
+    assert issubclass(type(next(g)), FullConn)
+    assert issubclass(type(next(g)), output.SoftMax)
+    try:
+        next(g)
+    except:
+        pass
+
+
+    n = N.Network()
+    inputLayer = RawInput((1, 28, 28))
+    n.setInput(inputLayer)
+    flatten = inputLayer.to(Flatten())
+    full1 = flatten.to(FullConn(feature_map_multiplier=2))
+    full2 = flatten.to(FullConn(feature_map_multiplier=2))
+    concat = Concat().from(full1, full2)
+    full3 = concat.to(FullConn(feature_map_multiplier=2))
+    n = N.Network()
+
+    g = n.nextLayer()
+    for i in g:
+        print(i)
+    
+
+    
+
 def test_predictBatchSize():
     """
     Test batch size works for perdictor.
@@ -32,52 +72,54 @@ def test_predictBatchSize():
     assert (ty[:(tlen-1),:] == n.predict(tx[:(tlen-1),:])).all()
 
 
-def test_predictWithIntermediaResult():
-    """
-    Test to see we can see intermediate result after each layer.
-    """
+#def test_predictWithIntermediaResult():
+#    """
+#    Test to see we can see intermediate result after each layer.
+#    """
+#
+#    class Linear2d(Layer):
+#        def __init__(self):
+#            super(Linear2d, self).__init__()
+#
+#        def forwardSize(self, inputsize):
+#            isize = inputsize[0]
+#            return [(isize[0], 2,)]
+#
+#    class Linear2da(Linear2d):
+#        def __init__(self):
+#            super(Linear2da, self).__init__()
+#            self.w = theano.shared(np.array([[1, 2],[3, 4]]), borrow=True)
+#                
+#        def predictForward(self, inputtensor):
+#            inputimage = inputtensor[0]
+#            return (T.dot(inputimage, self.w),)
+#
+#    class Linear2db(Linear2d):
+#        def __init__(self):
+#            super(Linear2db, self).__init__()
+#            self.w = theano.shared(np.array([[-2.0, 1.0],[1.5, -0.5]]), borrow=True)
+#            
+#        def predictForward(self, inputtensor):
+#            inputimage = inputtensor[0]
+#            return (T.dot(inputimage, self.w),)
+#        
+#    n = N.Network()
+#    n.setInput(RawInput((2,)))
+#    n.append(Linear2da(), "output1")
+#    n.append(Linear2db(), "output2")
+#
+#    n.build()
+#
+#    tx = np.array([[ 1.38921142,  0.57967604],
+#                   [-0.56795221,  1.38135903],
+#                   [-0.30971383, -1.06001774],
+#                   [-1.70132043,  1.78895373],
+#                   [-0.59605122,  0.8748537 ],
+#                   [-0.05554206, -0.62843449]])
+#    ty = tx
+#
+#    assert (np.abs(ty - n.predict(tx)) < 0.001).all()
 
-    class Linear2d(Layer):
-        def __init__(self):
-            super(Linear2d, self).__init__()
 
-        def forwardSize(self, inputsize):
-            isize = inputsize[0]
-            return [(isize[0], 2,)]
-
-    class Linear2da(Linear2d):
-        def __init__(self):
-            super(Linear2da, self).__init__()
-            self.w = theano.shared(np.array([[1, 2],[3, 4]]), borrow=True)
-                
-        def predictForward(self, inputtensor):
-            inputimage = inputtensor[0]
-            return (T.dot(inputimage, self.w),)
-
-    class Linear2db(Linear2d):
-        def __init__(self):
-            super(Linear2db, self).__init__()
-            self.w = theano.shared(np.array([[-2.0, 1.0],[1.5, -0.5]]), borrow=True)
-            
-        def predictForward(self, inputtensor):
-            inputimage = inputtensor[0]
-            return (T.dot(inputimage, self.w),)
-        
-    n = N.Network()
-    n.setInput(RawInput((2,)))
-    n.append(Linear2da(), "output1")
-    n.append(Linear2db(), "output2")
-
-    n.build()
-
-    tx = np.array([[ 1.38921142,  0.57967604],
-                   [-0.56795221,  1.38135903],
-                   [-0.30971383, -1.06001774],
-                   [-1.70132043,  1.78895373],
-                   [-0.59605122,  0.8748537 ],
-                   [-0.05554206, -0.62843449]])
-    ty = tx
-
-    assert (np.abs(ty - n.predict(tx)) < 0.001).all()
-
-
+if __name__ == '__main__':
+    test_nextLayer()

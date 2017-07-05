@@ -18,10 +18,10 @@ class Layer(yaml.YAMLObject):
     def __init__(self):
         # Layer name may used to print/debug
         # per instance
-        self.name = 'Layer'
+        self.name = None
         # Layer name may used for saving
         # per instance
-        self.saveName = 'saveName'
+        self.saveName = None
         
         # layer may have multiple input/output
         # only used for network
