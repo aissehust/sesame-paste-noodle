@@ -190,7 +190,8 @@ class Network(learner.SupervisedLearner):
                         openEndLayer.remove(yieldCandidate)
                         visitedLayer[yieldCandidate] = 1
                         for item in yieldCandidate.outputLayer:
-                            openEndLayer.appendleft(item)
+                            if openEndLayer.count(item) <= 0:
+                                openEndLayer.appendleft(item)
                             
                         break
 

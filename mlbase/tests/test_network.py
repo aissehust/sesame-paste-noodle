@@ -3,8 +3,9 @@ import theano.tensor as T
 import mlbase.network as N
 import numpy as np
 from mlbase.layers import *
+import pytest
 
-def test_nextLayer():
+def test_nextLayerSeq():
     n = N.Network()
 
     n.setInput(RawInput((1, 28, 28)))
@@ -21,26 +22,30 @@ def test_nextLayer():
     assert issubclass(type(next(g)), Elu)
     assert issubclass(type(next(g)), FullConn)
     assert issubclass(type(next(g)), output.SoftMax)
-    try:
+    with pytest.raises(Exception) as e:
         next(g)
-    except:
-        pass
 
+def test_nextLayerDiamond():
 
     n = N.Network()
+    
     inputLayer = RawInput((1, 28, 28))
     n.setInput(inputLayer)
-    flatten = inputLayer.to(Flatten())
-    full1 = flatten.to(FullConn(feature_map_multiplier=2))
-    full2 = flatten.to(FullConn(feature_map_multiplier=2))
-    concat = Concat().from(full1, full2)
-    full3 = concat.to(FullConn(feature_map_multiplier=2))
-    n = N.Network()
-
-    g = n.nextLayer()
-    for i in g:
-        print(i)
+    flatten = inputLayer.followedBy(Flatten())
+    full1 = flatten.followedBy(FullConn(feature_map_multiplier=2))
+    full2 = flatten.followedBy(FullConn(feature_map_multiplier=2))
+    concat = Concat().follow(full1, full2)
+    full3 = concat.followedBy(FullConn(feature_map_multiplier=2))
     
+    g = n.nextLayer()
+    assert issubclass(type(next(g)), RawInput)
+    assert issubclass(type(next(g)), Flatten)
+    assert issubclass(type(next(g)), FullConn)
+    assert issubclass(type(next(g)), FullConn)
+    assert issubclass(type(next(g)), Concat)
+    assert issubclass(type(next(g)), FullConn)
+    with pytest.raises(Exception) as e:
+        next(g)
 
     
 
@@ -121,5 +126,3 @@ def test_predictBatchSize():
 #    assert (np.abs(ty - n.predict(tx)) < 0.001).all()
 
 
-if __name__ == '__main__':
-    test_nextLayer()
