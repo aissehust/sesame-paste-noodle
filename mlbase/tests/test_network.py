@@ -5,6 +5,8 @@ import numpy as np
 from mlbase.layers import *
 import pytest
 import mlbase.cost as cost
+import os
+import datetime
 
 
 def test_properties():
@@ -46,10 +48,10 @@ def test_properties():
     assert n.learningRate != va
     assert n.learningRate == vb
 
-    
+
 def test_connectLayer():
     n = N.Network()
-    li = RawInput((1, 28,28))
+    li = RawInput((1, 28, 28))
     n.setInput(li)
     lc1 = Conv2d(feature_map_multiplier=32)
     la1 = Relu()
@@ -66,6 +68,7 @@ def test_connectLayer():
     assert next(g) == lp1
     with pytest.raises(Exception) as e:
         next(g)
+
 
 def test_nextLayerSeq():
     n = N.Network()
@@ -87,10 +90,11 @@ def test_nextLayerSeq():
     with pytest.raises(Exception) as e:
         next(g)
 
+
 def test_nextLayerDiamond():
 
     n = N.Network()
-    
+
     inputLayer = RawInput((1, 28, 28))
     n.setInput(inputLayer)
     flatten = inputLayer.followedBy(Flatten())
@@ -98,7 +102,7 @@ def test_nextLayerDiamond():
     full2 = flatten.followedBy(FullConn(feature_map_multiplier=2))
     concat = Concat().follow(full1, full2)
     full3 = concat.followedBy(FullConn(feature_map_multiplier=2))
-    
+
     g = n.nextLayer()
     assert next(g) == inputLayer
     assert next(g) == flatten
@@ -109,7 +113,7 @@ def test_nextLayerDiamond():
     with pytest.raises(Exception) as e:
         next(g)
 
-    
+
 def test_predictBatchSize():
     """
     Test batch size works for perdictor.
@@ -117,10 +121,10 @@ def test_predictBatchSize():
     n = N.Network()
     n.batchSize = 2
 
-    n.inputSizeChecker = [1,1]
-    
+    n.inputSizeChecker = [1, 1]
+
     x = T.fmatrix()
-    y = T.switch(T.gt(x,0), 1, 0)
+    y = T.switch(T.gt(x, 0), 1, 0)
     f = theano.function([x], y, allow_input_downcast=True)
     n.predicter = f
 
@@ -135,9 +139,9 @@ def test_predictBatchSize():
     tlen = 20
 
     assert (ty == n.predict(tx)).all()
-    assert (ty[:(tlen-1),:] == n.predict(tx[:(tlen-1),:])).all()
+    assert (ty[:(tlen-1), :] == n.predict(tx[:(tlen-1), :])).all()
 
-    
+
 def test_build():
     n = N.Network()
 
@@ -157,13 +161,13 @@ def test_build():
 def test_train():
     n = N.Network()
 
-    trainX = np.random.randint(2, size=(2000,2))
-    trainY = (trainX.sum(axis=1,keepdims=True) % 2)
+    trainX = np.random.randint(2, size=(2000, 2))
+    trainY = (trainX.sum(axis=1, keepdims=True) % 2)
 
     n.setInput(RawInput((2,)))
-    n.append(FullConn(input_feature=2,output_feature=2))
+    n.append(FullConn(input_feature=2, output_feature=2))
     n.append(Elu())
-    n.append(FullConn(input_feature=2,output_feature=1))
+    n.append(FullConn(input_feature=2, output_feature=1))
     n.costFunc = cost.ImageSSE
     n.X = T.matrix()
 
@@ -223,4 +227,22 @@ def test_train():
 #
 #    assert (np.abs(ty - n.predict(tx)) < 0.001).all()
 
+def test_networkSnapshot(tmpdir):
+    n = N.Network()
 
+    n.modelSavePath = str(tmpdir.mkdir("snapshot"))
+    n.modelPrefix = "test_snapshot"
+
+    time1 = datetime.datetime.strptime("2017-07-06_08-00-00", '%Y-%m-%d_%H-%M-%S')
+    time2 = datetime.datetime.strptime("2017-07-06_09-00-00", '%Y-%m-%d_%H-%M-%S')
+
+    fn1 = n.getSaveModelName(dateTime=time1)
+    fn2 = n.getSaveModelName(dateTime=time2)
+
+    open(fn1, 'a').close()
+    open(fn2, 'a').close()
+
+    n.updateLatestLink()
+
+    linkFileName = n.getLastLinkName()
+    assert os.path.realpath(linkFileName) == fn2

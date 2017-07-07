@@ -45,7 +45,7 @@ class TestConv2d(unittest.TestCase):
         y = conv2d.forward([input_x,])[0]
 
         f = theano.function(inputs=[input_x], outputs=y, allow_input_downcast=True)
-        
+
         y_shape = f(x).shape
         self.assertEqual(y_shape, (500, 20, 28, 28))
         

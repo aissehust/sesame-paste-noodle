@@ -344,7 +344,7 @@ class Network(learner.SupervisedLearner):
         
         return retY
 
-    # The following stuff are for saving and loading
+    # The following methods are used to localte model snapshot.
     def getSaveModelName(self, dateTime=None):
         """
         Return default model saving file name, including path prefix.
@@ -389,7 +389,8 @@ class Network(learner.SupervisedLearner):
         os.symlink(lastRealFileName, self.modelSavePrefix + self.latestLinkName)
         os.chdir(cwd)
         return
-    
+
+    # The following methods are for save/load.
     def save(self, ostream):
         """
         Save model to the stream.
