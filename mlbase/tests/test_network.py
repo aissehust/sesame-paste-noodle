@@ -38,17 +38,16 @@ def test_nextLayerDiamond():
     full3 = concat.followedBy(FullConn(feature_map_multiplier=2))
     
     g = n.nextLayer()
-    assert issubclass(type(next(g)), RawInput)
-    assert issubclass(type(next(g)), Flatten)
-    assert issubclass(type(next(g)), FullConn)
-    assert issubclass(type(next(g)), FullConn)
-    assert issubclass(type(next(g)), Concat)
-    assert issubclass(type(next(g)), FullConn)
+    assert next(g) == inputLayer
+    assert next(g) == flatten
+    assert next(g) == full2
+    assert next(g) == full1
+    assert next(g) == concat
+    assert next(g) == full3
     with pytest.raises(Exception) as e:
         next(g)
 
     
-
 def test_predictBatchSize():
     """
     Test batch size works for perdictor.

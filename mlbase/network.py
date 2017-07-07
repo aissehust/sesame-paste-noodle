@@ -184,7 +184,7 @@ class Network(learner.SupervisedLearner):
                 shouldStop = True
             else:
                 for yieldCandidate in openEndLayer:
-                    if issubclass(type(yieldCandidate), RawInput) or \
+                    if len(yieldCandidate.inputLayer) == 0 or\
                        all([i in visitedLayer for i in yieldCandidate.inputLayer]):
                         yieldLayer = yieldCandidate
                         openEndLayer.remove(yieldCandidate)

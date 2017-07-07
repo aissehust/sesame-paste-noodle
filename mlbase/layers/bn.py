@@ -57,10 +57,10 @@ class BatchNormalization(Layer):
         #print('bn.size: {}'.format(isize))
         
         betaInit = floatX(np.zeros(isize))
-        self.beta = theano.shared(betaInit, name=self.name+'beta', borrow=True)
+        self.beta = theano.shared(betaInit, borrow=True)
 
         gammaInit = floatX(np.ones(isize))
-        self.gamma = theano.shared(gammaInit, name=self.name+'gamma', borrow=True)
+        self.gamma = theano.shared(gammaInit, borrow=True)
 
         meanInit = floatX(np.zeros(isize))
         self.meanStats = theano.shared(meanInit, borrow=True)
