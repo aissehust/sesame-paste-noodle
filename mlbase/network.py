@@ -163,7 +163,7 @@ class Network(learner.SupervisedLearner):
         return
 
     def resetLayer(self):
-        pass
+        raise Exception("It's better to create new network instead of resetting layers.'")
 
     def nextLayer(self):
         """
@@ -184,7 +184,7 @@ class Network(learner.SupervisedLearner):
                 shouldStop = True
             else:
                 for yieldCandidate in openEndLayer:
-                    if len(yieldCandidate.inputLayer) == 0 or\
+                    if len(yieldCandidate.inputLayer) == 0 or \
                        all([i in visitedLayer for i in yieldCandidate.inputLayer]):
                         yieldLayer = yieldCandidate
                         openEndLayer.remove(yieldCandidate)

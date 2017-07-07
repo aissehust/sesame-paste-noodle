@@ -4,6 +4,68 @@ import mlbase.network as N
 import numpy as np
 from mlbase.layers import *
 import pytest
+import mlbase.cost as cost
+
+
+def test_properties():
+    n = N.Network()
+
+    va = n.modelPrefix
+    vb = 'test'
+    n.modelPrefix = vb
+    assert n.modelPrefix != va
+    assert n.modelPrefix == vb
+
+    va = n.batchSize
+    vb = 39
+    n.batchSize = vb
+    assert n.batchSize != va
+    assert n.batchSize == vb
+
+    va = n.saveInterval
+    vb = 939
+    n.saveInterval = vb
+    assert n.saveInterval != va
+    assert n.saveInterval == vb
+
+    va = n.costFunction
+    vb = cost.CostFunc
+    n.costFunction = vb
+    assert n.costFunction != va
+    assert n.costFunction == vb
+
+    va = n.inputOutputType
+    vb = (T.dscalar(), T.dscalar())
+    n.inputOutputType = vb
+    assert all([v1.type != v2.type for v1, v2 in zip(n.inputOutputType, va)])
+    assert all([v1.type == v2.type for v1, v2 in zip(n.inputOutputType, vb)])
+
+    va = n.learningRate
+    vb = 99
+    n.learningRate = vb
+    assert n.learningRate != va
+    assert n.learningRate == vb
+
+    
+def test_connectLayer():
+    n = N.Network()
+    li = RawInput((1, 28,28))
+    n.setInput(li)
+    lc1 = Conv2d(feature_map_multiplier=32)
+    la1 = Relu()
+    lp1 = Pooling()
+
+    n.connect(li, lc1)
+    n.connect(lc1, la1)
+    n.connect(la1, lp1)
+
+    g = n.nextLayer()
+    assert next(g) == li
+    assert next(g) == lc1
+    assert next(g) == la1
+    assert next(g) == lp1
+    with pytest.raises(Exception) as e:
+        next(g)
 
 def test_nextLayerSeq():
     n = N.Network()
@@ -75,6 +137,43 @@ def test_predictBatchSize():
     assert (ty == n.predict(tx)).all()
     assert (ty[:(tlen-1),:] == n.predict(tx[:(tlen-1),:])).all()
 
+    
+def test_build():
+    n = N.Network()
+
+    n.setInput(RawInput((1, 28, 28)))
+    n.append(Flatten())
+    n.append(FullConn(feature_map_multiplier=2))
+    n.append(Elu())
+    n.append(FullConn(output_feature=10))
+    n.append(output.SoftMax())
+
+    n.build()
+
+    assert n.learner is not None
+    assert n.predicter is not None
+
+
+def test_train():
+    n = N.Network()
+
+    trainX = np.random.randint(2, size=(2000,2))
+    trainY = (trainX.sum(axis=1,keepdims=True) % 2)
+
+    n.setInput(RawInput((2,)))
+    n.append(FullConn(input_feature=2,output_feature=2))
+    n.append(Elu())
+    n.append(FullConn(input_feature=2,output_feature=1))
+    n.costFunc = cost.ImageSSE
+    n.X = T.matrix()
+
+    n.build()
+
+    errorRateOld = np.mean((n.predict(trainX)-trainY)**2)
+    for i in range(5):
+        n.train(trainX, trainY)
+    errorRateNew = np.mean((n.predict(trainX)-trainY)**2)
+    assert errorRateNew < errorRateOld
 
 #def test_predictWithIntermediaResult():
 #    """
