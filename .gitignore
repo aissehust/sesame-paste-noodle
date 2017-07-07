@@ -48,3 +48,4 @@ TheFramework.egg-info/
 expdata
 docs/_build
 .cache
+.coverage

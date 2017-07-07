@@ -21,7 +21,10 @@ install:
   - pip install -e .
 
 script:
-  - pytest mlbase/tests
+  - pytest --cov-config .coveragerc --cov=mlbase mlbase/tests/
+
+after_success:
+  - coveralls
 
 cache:
   - apt

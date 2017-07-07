@@ -3,3 +3,6 @@ theano
 h5py
 pyyaml
 pytest
+coverage
+pytest-cov
+coveralls
