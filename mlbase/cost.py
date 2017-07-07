@@ -11,7 +11,8 @@ class CostFunc:
     """
     @staticmethod
     def cost(Y, tY):
-        return
+        raise Exception("Cost function base class.")
+
 
 class TwoStageCost(CostFunc):
     """
@@ -22,7 +23,8 @@ class TwoStageCost(CostFunc):
     """
     @staticmethod
     def cost(Y, tY):
-        return
+        raise Exception("TwoStageCost base class.")
+
 
 class IndependentCost(CostFunc):
     """
@@ -31,8 +33,10 @@ class IndependentCost(CostFunc):
     """
     @staticmethod
     def cost(Y, tY):
-        return
+        raise Exception("IndependentCost base class.")
 
+
+# function used to collect total cost
 def aggregate(loss, weights=None, mode='mean'):
     """
     This code is from lasagne/objectives.py
@@ -44,6 +48,7 @@ def aggregate(loss, weights=None, mode='mean'):
     else:
         raise NotImplementedError('Unknown aggregation funciton.')
 
+
 class CrossEntropy(IndependentCost):
     """
     Wrap of categorical_crossentropy from theano
@@ -51,6 +56,7 @@ class CrossEntropy(IndependentCost):
     @staticmethod
     def cost(Y, tY):
         return T.nnet.categorical_crossentropy(Y, tY)
+
 
 class ImageDiff(IndependentCost):
     """
@@ -76,6 +82,7 @@ class ImageSSE(ImageDiff):
         ftY = tY.flatten(2)
         ret = T.sum((fY - ftY)*(fY - ftY), axis=1)
         return ret
+
 
 class ImageDice(ImageDiff):
     """
