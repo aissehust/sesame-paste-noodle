@@ -140,20 +140,28 @@ class ConcatenatedReLU(NonLinear):
             
     def __init__(self):
         super(ConcatenatedReLU, self).__init__()
+        self.concatAxis = 1
 
     def getpara(self):
         return []
 
     def forward(self, inputtensor):
         inputimage = inputtensor[0]
-        return (T.concatenate([T.nnet.relu(inputimage), T.nnet.relu(-inputimage)], axis=1),)
+        return (T.concatenate([T.nnet.relu(inputimage),
+                               T.nnet.relu(-inputimage)],
+                              axis=self.concatAxis),)
 
     def forwardSize(self, inputsize):
         isize = inputsize[0]
-        if len(isize) == 4:
-            return ((isize[0], isize[1]*2, isize[2], isize[3]),)
-        else:
-            raise NotImplementedError('ConcatenatedReLU should follow conv2d.')
+
+        osize = []
+        for v, i in zip(isize, range(len(isize))):
+            if i != self.concatAxis:
+                osize.append(v)
+            else:
+                osize.append(v*2)
+
+        return (osize,)
 
     def __str__(self):
         ret = 'ConcatenatedReLU:'
