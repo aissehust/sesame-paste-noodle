@@ -49,3 +49,4 @@ expdata
 docs/_build
 .cache
 .coverage
+.coveralls.yml

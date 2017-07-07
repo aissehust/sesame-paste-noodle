@@ -21,7 +21,7 @@ install:
   - pip install -e .
 
 script:
-  - pytest --cov-config .coveragerc --cov=mlbase mlbase/tests/
+  - pytest --cov-report= --cov-config .coveragerc --cov=mlbase mlbase/tests/
 
 after_success:
   - coveralls
