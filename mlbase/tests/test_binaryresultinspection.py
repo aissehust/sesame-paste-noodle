@@ -17,3 +17,9 @@ def test_BinaryResultInspection():
     assert abs(inspector.precision() - 0.5) < 0.1
     assert abs(inspector.recall() - 0.5) < 0.1
     assert abs(inspector.fallout() - 0.5) < 0.1
+
+    inspector.reset()
+    assert inspector.tp == 0
+    assert inspector.fp == 0
+    assert inspector.tn == 0
+    assert inspector.fn == 0

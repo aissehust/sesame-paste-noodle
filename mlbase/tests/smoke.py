@@ -9,6 +9,86 @@ from mlbase.layers import *
 import mlbase.cost as cost
 from skimage.measure import block_reduce
 
+def test_input():
+    network = N.Network()
+    network.debug = True
+
+    network.setInput(RawInput((1, 28,28)))
+    network.append(Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Binarize())
+    network.append(Conv2d(filter_size=(3,3), input_feature=32, output_feature=64))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Binarize())
+    network.append(Conv2d(filter_size=(3,3), input_feature=64, output_feature=128))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Flatten())
+    network.append(FullConn(input_feature=1152, output_feature=1152*2))
+    network.append(Relu())
+    network.append(FullConn(input_feature=1152*2, output_feature=10))
+    network.append(SoftMax())
+
+    network.build()
+
+    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
+
+    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
+    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
+
+    trY = np.zeros((f['t_train'].shape[0], 10))
+    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
+    teY = np.zeros((f['t_test'].shape[0], 10))
+    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
+
+
+def test_binaryweight():
+    network = N.Network()
+    network.debug = True
+
+    network.setInput(RawInput((1, 28,28)))
+    network.append(Conv2d(feature_map_multiplier=32))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Binarize())
+    network.append(Conv2d(feature_map_multiplier=2))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Binarize())
+    network.append(BinaryConv2d(feature_map_multiplier=2))
+    network.append(Relu())
+    network.append(Pooling((2,2)))
+    network.append(Flatten())
+    network.append(FullConn(input_feature=1152, output_feature=1152*2))
+    network.append(Relu())
+    network.append(FullConn(input_feature=1152*2, output_feature=10))
+    network.append(SoftMax())
+
+    network.build()
+
+    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
+
+    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
+    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
+
+    trY = np.zeros((f['t_train'].shape[0], 10))
+    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
+    teY = np.zeros((f['t_test'].shape[0], 10))
+    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
+
+    for i in range(5000):
+        print(i)
+        network.train(trX, trY)
+        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
+
+
 def test_unet():
     n = N.Network()
 
