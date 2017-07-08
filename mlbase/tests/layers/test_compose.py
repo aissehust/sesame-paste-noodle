@@ -1,5 +1,6 @@
 import pytest
 from mlbase.layers import *
+import theano.tensor as T
 
 
 def test_DAGPlan():
@@ -56,7 +57,12 @@ def test_DAG():
         pass
     
     testLayer = TestLayer()
-
+    
+    testLayer.forwardSize([(128, 3, 28, 28),])
+    testLayer.forward((T.tensor4(),))
+    testLayer.predictForward((T.tensor4(),))
+    testLayer.getpara()
+    testLayer.getExtraPara((T.tensor4(),))
 
 def test_SeqLayer():
     class ConvNN(Layer, metaclass=SeqLayer,
@@ -68,4 +74,9 @@ def test_SeqLayer():
             self.bases[0] = Conv2d(feature_map_multiplier=feature_map_multiplier)
 
     l = ConvNN()
+    l.forwardSize([(128, 3, 28, 28),])
+    l.forward((T.tensor4(),))
+    l.predictForward((T.tensor4(),))
+    l.getpara()
+    l.getExtraPara((T.tensor4(),))
 

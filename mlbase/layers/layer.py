@@ -40,6 +40,7 @@ class Layer(yaml.YAMLObject):
     def getExtraPara(self, inputtensor):
         """
         Parameters that are not in the collection for updating by backpropagation.
+        For example, neuron activation statistics.
         """
         return []
     
