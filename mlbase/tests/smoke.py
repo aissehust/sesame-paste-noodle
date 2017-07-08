@@ -9,7 +9,7 @@ from mlbase.layers import *
 import mlbase.cost as cost
 from skimage.measure import block_reduce
 
-def test_input():
+def test_binaryinput():
     network = N.Network()
     network.debug = True
 

@@ -24,6 +24,9 @@ class DAGPlan(DAGBase, yaml.YAMLObject, metaclass=DAGPlanMeta):
 
     @classmethod
     def input(cls):
+        """
+        Intend to be the input for the layers.
+        """
         return DAGPlan()
 
     def nextNode(self):
