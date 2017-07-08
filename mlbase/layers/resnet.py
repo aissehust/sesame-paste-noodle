@@ -3,6 +3,9 @@ import theano
 import theano.tensor as T
 import sys
 from mlbase.layers import layer
+from .conv import Conv2d
+from .bn import BatchNormalization
+from .activation import Relu
 
 __all__ = [
     'ResLayer',
@@ -74,27 +77,27 @@ class ResLayer(layer.Layer):
         isize = inputsize[0]
 
         if self.increaseDim:
-            self.conv1 = N.Conv2d(self.filterSize,
+            self.conv1 = Conv2d(self.filterSize,
                                   input_feature=isize[1],
                                   output_feature=isize[1]*2,
                                   subsample=(2,2))
-            self.conv2 = N.Conv2d(self.filterSize,
+            self.conv2 = Conv2d(self.filterSize,
                                   input_feature=isize[1]*2,
                                   output_feature=isize[1]*2)
         else:
-            self.conv1 = N.Conv2d(self.filterSize,
+            self.conv1 = Conv2d(self.filterSize,
                                   input_feature=isize[1],
                                   output_feature=isize[1])
-            self.conv2 = N.Conv2d(self.filterSize,
+            self.conv2 = Conv2d(self.filterSize,
                                   input_feature=isize[1],
                                   output_feature=isize[1])
 
 
-        self.bn1 = N.BatchNormalization()
-        self.bn2 = N.BatchNormalization()
+        self.bn1 = BatchNormalization()
+        self.bn2 = BatchNormalization()
 
-        self.relu1 = N.Relu()
-        self.relu2 = N.Relu()
+        self.relu1 = Relu()
+        self.relu2 = Relu()
             
         s1 = self.conv1.forwardSize(inputsize)
         s2 = self.bn1.forwardSize(s1)
@@ -121,85 +124,3 @@ class ResLayer(layer.Layer):
         ret = ResLayer()
         ret.loadFromObjMap(obj_dict)
         return ret
-
-def test():
-    import mlbase.network as N
-    import h5py
-    
-    network = N.Network()
-    network.debug = True
-
-    network.setInput(N.RawInput((1,28,28)))
-    network.append(N.Conv2d(feature_map_multiplier=32))
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(ResLayer(increase_dim=True))
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(ResLayer(increase_dim=True))
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(ResLayer())
-    network.append(N.GlobalPooling())
-    network.append(N.FullConn(input_feature=128, output_feature=10))
-    network.append(N.SoftMax())
-
-    network.build()
-
-    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
-
-    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
-    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
-
-    trY = np.zeros((f['t_train'].shape[0], 10))
-    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
-    teY = np.zeros((f['t_test'].shape[0], 10))
-    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
-
-    for i in range(5000):
-        print(i)
-        network.train(trX, trY)
-        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
-
-
-def test_deeper():
-    import h5py
-
-    network = N.Network()
-    network.debug = True
-
-    network.setInput(N.RawInput((1,28,28)))
-    network.append(N.Conv2d(feature_map_multiplier=32))
-    for _ in range(3):
-        network.append(ResLayer())
-    network.append(ResLayer(increase_dim=True))
-    for _ in range(3):
-        network.append(ResLayer())
-    network.append(ResLayer(increase_dim=True))
-    for _ in range(3):
-        network.append(ResLayer())
-    network.append(N.GlobalPooling())
-    network.append(N.FullConn(input_feature=128, output_feature=10))
-    network.append(N.SoftMax())
-
-    network.build()
-
-    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
-
-    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
-    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
-
-    trY = np.zeros((f['t_train'].shape[0], 10))
-    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
-    teY = np.zeros((f['t_test'].shape[0], 10))
-    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
-
-    for i in range(5000):
-        print(i)
-        network.train(trX, trY)
-        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
-    
-if __name__ == '__main__':
-    test_deeper()
