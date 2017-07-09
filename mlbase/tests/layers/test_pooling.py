@@ -2,8 +2,10 @@ import unittest
 import mlbase.layers as layer
 import numpy as np
 import theano
+import theano.tensor as T
 
 rng = np.random.RandomState(1111)
+
 
 class TestPooling(unittest.TestCase):
     
@@ -20,6 +22,7 @@ class TestPooling(unittest.TestCase):
         y = pooling.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 20, 14, 14))
+
         
 class TestGlobalPooling(unittest.TestCase):
 
@@ -36,9 +39,22 @@ class TestGlobalPooling(unittest.TestCase):
         y = gp.forward([x])
         y_shape = y[0].eval().shape
         self.assertEqual(y_shape, (500, 10))
+
+
+class TestFeaturePooling(unittest.TestCase):
+    def test_featurepooling_forwardSize(self):
+        x = [(128, 16, 28, 28)]
+        l = layer.FeaturePooling()
+        y = l.forwardSize(x)
+        self.assertEqual(y, [[128, 4, 28, 28]])
+
+    def test_featurepooling_forward(self):
+        l = layer.FeaturePooling()
+        l.forward((T.tensor4(),))
         
-#class TestUpPooling(unittest.TestCase):
-#    
-#    def test_upPooling(self):
-#        self.assertEqual(1,1)
+
         
+class TestUpPooling(unittest.TestCase):
+    
+    def test_upPooling(self):
+        l = layer.UpPooling()
