@@ -9,6 +9,79 @@ from mlbase.layers import *
 import mlbase.cost as cost
 from skimage.measure import block_reduce
 
+def test_generative():
+    import mlbase.cost as cost
+    import mlbase.layers.activation as act
+    import h5py
+        
+    network = N.Network()
+    network.debug = True
+
+    network.setInput(N.RawInput((1, 28,28)))
+    network.append(N.Conv2d(feature_map_multiplier=32))
+    network.append(act.Relu())
+    network.append(N.Pooling())
+    network.append(N.Conv2d(feature_map_multiplier=2))
+    network.append(act.Relu())
+    network.append(N.Pooling())
+    network.append(UpConv2d(feature_map_multiplier=2))
+    network.append(act.Relu())
+    network.append(UpConv2d(feature_map_multiplier=32))
+    network.append(act.Relu())
+    #network.append(N.Flatten())
+    #network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
+    #network.append(N.Relu())
+    #network.append(N.FullConn(input_feature=1152*2, output_feature=10))
+    #network.append(N.SoftMax())
+
+    network.costFunction = cost.ImageSSE
+    network.inputOutputType = (T.tensor4(), T.tensor4(),)
+
+    network.build()
+
+    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
+
+    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
+    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
+
+    trY = np.zeros((f['t_train'].shape[0], 10))
+    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
+    teY = np.zeros((f['t_test'].shape[0], 10))
+    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
+
+    for i in range(5000):
+        print(i)
+        #network.train(trX, trY)
+        #print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
+        network.train(trX, trX)
+        print(np.sum((teX - network.predict(teX)) * (teX - network.predict(teX))))
+
+    # the following is the piece to load model and predict a image.
+    #import mlbase.networkhelper as N
+    #import mlbase.cost as cost
+    #import theano.tensor as T
+    #import mlbase.loaddata as l
+    #from PIL import Image
+    #
+    #n = N.Network()
+    #n.loadFromFile('/hdd/home/yueguan/workspace/sesame-paste-noodle-dev/expdata/saved_model_LAST')
+    #n.costFunction = cost.ImageSSE
+    #n.inputOutputType = (T.tensor4(), T.tensor4(),)
+    #
+    #n.build(reload=True)
+    #
+    #trX, trY, teX, teY = l.load_mnist()
+    #result = n.predict(trX[0:1])
+    #result = (result > 0).astype(float)*255.0
+    #
+    #
+    #im = Image.fromarray(result[0][0])
+    #if im.mode != 'RGB':
+    #    im = im.convert('RGB')
+    #
+    #im.save('result.jpg')
+
+
 def test_resnet():
     import mlbase.network as N
     import h5py
