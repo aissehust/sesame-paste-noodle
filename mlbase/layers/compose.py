@@ -24,6 +24,9 @@ class DAGPlan(DAGBase, yaml.YAMLObject, metaclass=DAGPlanMeta):
 
     @classmethod
     def input(cls):
+        """
+        Intend to be the input for the layers.
+        """
         return DAGPlan()
 
     def nextNode(self):
@@ -291,10 +294,10 @@ class SeqLayer(yaml.YAMLObjectMetaclass):
             return allpara
         result.getpara = getpara
 
-        def getExtraPara(selfc):
+        def getExtraPara(selfc, inputtensor):
             allpara = []
             for baseobj in selfc.bases:
-                allpara += baseobj.getExtraPara()
+                allpara += baseobj.getExtraPara(inputtensor)
             return allpara
         result.getExtraPara = getExtraPara
 

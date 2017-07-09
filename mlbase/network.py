@@ -23,8 +23,9 @@ class Network(learner.SupervisedLearner):
 
     def reset(self):
         """
-        For sequential layerout network, use append()
-        to add more layers, the first layer is set with setInput().
+        For sequential layerout network, use append().
+        
+        To add more layers, the first layer is set with setInput().
         Network can do this, because it remember which layer to append to 
         by using member variable currentLayer.
         """
@@ -133,7 +134,7 @@ class Network(learner.SupervisedLearner):
 
         return
     
-    def append(self, layer, reload=False):
+    def append(self, layer, reload=False, tag=None):
         if self.debug:
             print("Append {} to {}".format(layer.debugname, self.currentLayer.debugname))
 
@@ -149,7 +150,9 @@ class Network(learner.SupervisedLearner):
         return
 
     def connect(self, prelayer, nextlayer, reload=False):
-            
+        """
+        Connect prelayer to nextlayer.
+        """
         if not reload:
             layerCounter = self.layerNextCounter()
             nextlayer.name = nextlayer.LayerTypeName + layerCounter
@@ -160,11 +163,12 @@ class Network(learner.SupervisedLearner):
         return
 
     def resetLayer(self):
-        pass
+        raise Exception("It's better to create new network instead of resetting layers.'")
 
     def nextLayer(self):
         """
         Use this method to iterate over all known layers.
+        This is a DAG walker.
         """
         visitedLayer = {}
         openEndLayer = collections.deque()
@@ -180,13 +184,14 @@ class Network(learner.SupervisedLearner):
                 shouldStop = True
             else:
                 for yieldCandidate in openEndLayer:
-                    if issubclass(type(yieldCandidate), RawInput) or \
+                    if len(yieldCandidate.inputLayer) == 0 or \
                        all([i in visitedLayer for i in yieldCandidate.inputLayer]):
                         yieldLayer = yieldCandidate
                         openEndLayer.remove(yieldCandidate)
                         visitedLayer[yieldCandidate] = 1
                         for item in yieldCandidate.outputLayer:
-                            openEndLayer.appendleft(item)
+                            if openEndLayer.count(item) <= 0:
+                                openEndLayer.appendleft(item)
                             
                         break
 
@@ -199,7 +204,21 @@ class Network(learner.SupervisedLearner):
             ret[l.name] = l
         return ret
 
+    def buildPredict(self, reload=False):
+        for layer in self.nextLayer():
+            if self.debug:
+                print('Building for: {}'.format(layer.debugname))
+
+
+
+    def buildTrain(self, reload=False):
+        pass
+
     def build(self, reload=False):
+        """
+        Build the training function and predict function
+        after collecting all the necessary information.
+        """
 
         self.params = []
         extraUpdates = []
@@ -210,7 +229,9 @@ class Network(learner.SupervisedLearner):
                 print('Building for: {}'.format(layer.debugname))
 
             if issubclass(type(layer), RawInput):
-                buildBuffer[layer] = (layer.forwardSize([]), layer.forward((self.X,)), layer.predictForward((self.X,)))
+                buildBuffer[layer] = (layer.forwardSize([]),
+                                      layer.forward((self.X,)),
+                                      layer.predictForward((self.X,)))
                 continue
 
             currentSize = None
@@ -248,7 +269,8 @@ class Network(learner.SupervisedLearner):
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 
-        self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0], self.Y))
+        self.cost = cost.aggregate(self.costFunc.cost(currentTensor[0],
+                                                      self.Y))
         if self.regulator is not None:
             self.cost = self.regulator.addPenalty(self.cost, self.params)
         updates = self.gradientOpt(self.cost, self.params)
@@ -257,9 +279,12 @@ class Network(learner.SupervisedLearner):
             updates.append(extraUpdatesPair)
 
         self.learner = theano.function(inputs=[self.X, self.Y],
-                                       outputs=self.cost, updates=updates, allow_input_downcast=True)
+                                       outputs=self.cost,
+                                       updates=updates,
+                                       allow_input_downcast=True)
         self.predicter = theano.function(inputs=[self.X],
-                                         outputs=currentPredictTensor[0], allow_input_downcast=True)
+                                         outputs=currentPredictTensor[0],
+                                         allow_input_downcast=True)
 
     def train(self, X, Y):
         for di in range(len(X.shape)):
@@ -291,7 +316,7 @@ class Network(learner.SupervisedLearner):
                     os.remove(self.lastSaveAbsolutePath)
                 self.lastSaveAbsolutePath = newSavedFile
 
-    def predict(self, X):
+    def predict(self, X, stub=None, watcher=None):
         for di in range(len(X.shape)):
             if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
                 raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
@@ -315,9 +340,11 @@ class Network(learner.SupervisedLearner):
                 break
             startIndex += self.batchSize
 
+        
+        
         return retY
 
-    # The following stuff are for saving and loading
+    # The following methods are used to localte model snapshot.
     def getSaveModelName(self, dateTime=None):
         """
         Return default model saving file name, including path prefix.
@@ -362,7 +389,8 @@ class Network(learner.SupervisedLearner):
         os.symlink(lastRealFileName, self.modelSavePrefix + self.latestLinkName)
         os.chdir(cwd)
         return
-    
+
+    # The following methods are for save/load.
     def save(self, ostream):
         """
         Save model to the stream.
@@ -428,9 +456,3 @@ class Network(learner.SupervisedLearner):
             ret += layer.__str__() + '\n'
 
         return ret
-
-def test():
-    pass
-
-if __name__ == '__main__':
-    test()

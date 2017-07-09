@@ -1,6 +1,6 @@
 import numpy
 
-class binaryresultinspection:
+class BinaryResultInspection:
     """
     For calculate binary classifer metrics.
     """

@@ -102,7 +102,7 @@ class Concat(MoreIn):
 
     def forwardSize(self, inputsize):
         if not all([len(isize) == len(inputsize[0])  for isize in inputsize]):
-            raise AssertionError('Concat need all input have the same size')
+            raise AssertionError('Concat need all input have the same dimension.')
 
         for isize in inputsize:
             if not all([s1[1][0] == s1[1][1] for s1 in enumerate(zip(inputsize[0], isize)) if s1[0] != self.axis]):

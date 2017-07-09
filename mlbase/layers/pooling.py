@@ -8,6 +8,7 @@ __all__ = [
     'Pooling',
     'GlobalPooling',
     'FeaturePooling',
+    'UpPooling',
 ]
 
 @layerhelper
@@ -110,7 +111,7 @@ class FeaturePooling(Layer):
     """
     For maxout
     """
-    def __init__(self, pool_size, axis=1, pool_function=theano.tensor.max):
+    def __init__(self, pool_size=4, axis=1, pool_function=theano.tensor.max):
         super(FeaturePooling, self).__init__()
 
         self.poolSize = pool_size
@@ -182,16 +183,16 @@ class UpPooling(Layer):
     def __init__(self):
         super(UpPooling, self).__init__()
         
-        X = self.get_input(train)
-        if self.dim_ordering == 'th':
-            output = K.repeat_elements(X, self.size[0], axis=2)
-            output = K.repeat_elements(output, self.size[1], axis=3)
-        elif self.dim_ordering == 'tf':
-            output = K.repeat_elements(X, self.size[0], axis=1)
-            output = K.repeat_elements(output, self.size[1], axis=2)
-        else:
-            raise Exception('Invalid dim_ordering: ' + self.dim_ordering)
-        
-        f = T.grad(T.sum(self._pool2d_layer.get_output(train)), wrt=self._pool2d_layer.get_input(train)) * output
+        #X = self.get_input(train)
+        #if self.dim_ordering == 'th':
+        #    output = K.repeat_elements(X, self.size[0], axis=2)
+        #    output = K.repeat_elements(output, self.size[1], axis=3)
+        #elif self.dim_ordering == 'tf':
+        #    output = K.repeat_elements(X, self.size[0], axis=1)
+        #    output = K.repeat_elements(output, self.size[1], axis=2)
+        #else:
+        #    raise Exception('Invalid dim_ordering: ' + self.dim_ordering)
+        #
+        #f = T.grad(T.sum(self._pool2d_layer.get_output(train)), wrt=self._pool2d_layer.get_input(train)) * output
 
-        return f
+        #return f

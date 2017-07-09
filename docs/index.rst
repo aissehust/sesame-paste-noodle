@@ -10,13 +10,36 @@ SPN is library to build, train and save neural networks based on Theano.
 
 SPN defines a neural network image on hard disk to reuse and modify.
 
+#########
+Tutorials
+#########
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorial/mnist
+   tutorial/unet
+   tutorial/binarynet
+   tutorial/vbn
+   tutorial/gan
+
+
+############
+User's Guide
+############
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   user-guide/layer
+   user-guide/network
+   user-guide/activation-unit
+   user-guide/optimization
 
 
+#############
 API Reference
--------------
+#############
 
 The following is the document extracted from code.
 

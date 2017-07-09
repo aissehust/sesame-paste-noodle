@@ -18,10 +18,10 @@ class Layer(yaml.YAMLObject):
     def __init__(self):
         # Layer name may used to print/debug
         # per instance
-        self.name = 'Layer'
+        self.name = None
         # Layer name may used for saving
         # per instance
-        self.saveName = 'saveName'
+        self.saveName = None
         
         # layer may have multiple input/output
         # only used for network
@@ -40,6 +40,7 @@ class Layer(yaml.YAMLObject):
     def getExtraPara(self, inputtensor):
         """
         Parameters that are not in the collection for updating by backpropagation.
+        For example, neuron activation statistics.
         """
         return []
     
@@ -79,6 +80,35 @@ class Layer(yaml.YAMLObject):
         """
         return inputsize
 
+    def followedBy(self, *args):
+        """
+        The output of this layer will feed to
+        the layer instance in args list.
+
+        The method is used to build up connection.
+        """
+        for layer in args:
+            self.outputLayer.append(layer)
+            layer.inputLayer.append(self)
+
+        if len(args) == 1:
+            return args[0]
+        else:
+            return args
+
+    def follow(self, *args):
+        """
+        This layer will consume the output from
+        layers in the args
+
+        The method is used to build up connection.
+        """
+        for layer in args:
+            self.inputLayer.append(layer)
+            layer.outputLayer.append(self)
+
+        return self
+        
     def fillToObjMap(self):
         """
         Return a mapping representing the object

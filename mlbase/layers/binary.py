@@ -1,11 +1,17 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import mlbase.network as N
-import h5py
+from .layer import Layer
+from .layer import layerhelper
+from .conv import Conv2d
 
 from theano.scalar.basic import UnaryScalarOp, same_out_nocomplex
 from theano.tensor.elemwise import Elemwise
+
+__all__ = [
+    'BinaryConv2d',
+    'Binarize',
+]
 
 class BinaryOp(UnaryScalarOp):
     def c_code(self, node, name, x1, z1, sub):
@@ -17,10 +23,13 @@ class BinaryOp(UnaryScalarOp):
         (gz,) = gout
         return gz,
 
+
 binaryScalar = BinaryOp(same_out_nocomplex, name='binaryScalar')
 binaryOp = Elemwise(binaryScalar)
 
-class BinaryConv2d(N.Conv2d):
+
+@layerhelper
+class BinaryConv2d(Conv2d):
     """
     A binary convolution layer where
     both output and weights are binary.
@@ -80,7 +89,8 @@ class BinaryConv2d(N.Conv2d):
         return ret
 
 
-class Binarize(N.Layer):
+@layerhelper
+class Binarize(Layer):
     """
     Binary layer to binarilize input
     and bypass gradient (i.e. use straight through estimator)
@@ -122,87 +132,3 @@ class Binarize(N.Layer):
         ret = Binarize()
         ret.loadFromObjMap(objDict)
         return ret
-
-def test_input():
-    network = N.Network()
-    network.debug = True
-
-    network.setInput(N.RawInput((1, 28,28)))
-    network.append(N.Conv2d(filter_size=(3,3), input_feature=1, output_feature=32))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(Binarize())
-    network.append(N.Conv2d(filter_size=(3,3), input_feature=32, output_feature=64))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(Binarize())
-    network.append(N.Conv2d(filter_size=(3,3), input_feature=64, output_feature=128))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(N.Flatten())
-    network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
-    network.append(N.Relu())
-    network.append(N.FullConn(input_feature=1152*2, output_feature=10))
-    network.append(N.SoftMax())
-
-    network.build()
-
-    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
-
-    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
-    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
-
-    trY = np.zeros((f['t_train'].shape[0], 10))
-    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
-    teY = np.zeros((f['t_test'].shape[0], 10))
-    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
-
-    for i in range(5000):
-        print(i)
-        network.train(trX, trY)
-        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
-
-
-def test_binaryweight():
-    network = N.Network()
-    network.debug = True
-
-    network.setInput(N.RawInput((1, 28,28)))
-    network.append(N.Conv2d(feature_map_multiplier=32))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(Binarize())
-    network.append(N.Conv2d(feature_map_multiplier=2))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(Binarize())
-    network.append(BinaryConv2d(feature_map_multiplier=2))
-    network.append(N.Relu())
-    network.append(N.Pooling((2,2)))
-    network.append(N.Flatten())
-    network.append(N.FullConn(input_feature=1152, output_feature=1152*2))
-    network.append(N.Relu())
-    network.append(N.FullConn(input_feature=1152*2, output_feature=10))
-    network.append(N.SoftMax())
-
-    network.build()
-
-    f = h5py.File('/hdd/home/yueguan/workspace/data/mnist/mnist.hdf5', 'r')
-
-    trX = f['x_train'][:,:].reshape(-1, 1, 28, 28)
-    teX = f['x_test'][:,:].reshape(-1, 1, 28, 28)
-
-    trY = np.zeros((f['t_train'].shape[0], 10))
-    trY[np.arange(len(f['t_train'])), f['t_train']] = 1
-    teY = np.zeros((f['t_test'].shape[0], 10))
-    teY[np.arange(len(f['t_test'])), f['t_test']] = 1
-
-    for i in range(5000):
-        print(i)
-        network.train(trX, trY)
-        print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(network.predict(teX), axis=1)))
-
-
-
-if __name__ == '__main__':
-    test_binaryweight()
