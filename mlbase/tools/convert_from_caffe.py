@@ -1,5 +1,6 @@
 import argparse
 import caffe
+from caffe.proto import caffe_pb2
 import mlbase.network as N
 import mlbase.layers as L
 
@@ -37,7 +38,14 @@ def convert(def_path, caffemodel_path, output_path, phase):
             
             
 def getMeanImage(mean_path):
-    pass
+
+    # the following code is from https://github.com/BVLC/caffe/issues/290
+    blob = caffe.proto.caffe_pb2.BlobProto()
+    data = open( mean_path , 'rb' ).read()
+    blob.ParseFromString(data)
+    arr = np.array( caffe.io.blobproto_to_array(blob) )
+    out = arr[0]
+    np.save( sys.argv[2] , out )
     
 
 def main():
