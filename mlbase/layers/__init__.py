@@ -6,7 +6,7 @@ from .rawinput import *
 from .conv import *
 from .compose import *
 from .pooling import *
-from .bn import *
+from .normalization import *
 from .noise import *
 from .reshape import *
 from .fullconn import *

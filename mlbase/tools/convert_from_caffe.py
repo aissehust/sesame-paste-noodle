@@ -3,6 +3,7 @@ import caffe
 from caffe.proto import caffe_pb2
 import mlbase.network as N
 import mlbase.layers as L
+from google.protobuf import text_format
 
 def convert(def_path, caffemodel_path, output_path, phase):
     params = caffe.proto.caffe_pb2.NetParameter()
@@ -35,6 +36,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
             pass
         elif layer.type == '':
             pass
+
+    return n
             
             
 def getMeanImage(mean_path):
