@@ -13,8 +13,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
         text_format.Merge(def_file.read(), params)
 
 
-    layerName2InstanceMap = {}
-    layerName2Bottom = {}
+    layerName2InstanceMap = {} # dict of str:layer 
+    layerName2Bottom = {} # dict of str:list
 
     for layer in params.layer:
         if layer.type == 'Input':
@@ -27,10 +27,14 @@ def convert(def_path, caffemodel_path, output_path, phase):
             bottom = layer.bottom
             output_feature_map = layer.convolution_param.num_output
             kernel_size = layer.convolution_param.kernel_size[0]
-            stride = None
+            stride = (1,1)
             if len(layer.convolution_param.stride) > 0:
                 stride = layer.convolution_param.stride[0]
-            nl = L.Conv2d()
+                stride = (stride, stride)
+                
+            nl = L.Conv2d(filter_size=(kernel_size, kernel_size)
+                          , output_feature=output_feature_map
+                          , subsample=stride)
             layerName2InstanceMap[name] = nl
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'ReLU':
