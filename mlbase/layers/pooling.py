@@ -30,7 +30,13 @@ class Pooling(Layer):
         else:
             self.stride = stride
         self.pad = pad
-        self.mode = mode
+            
+        if mode == 'max':
+            self.mode = mode
+        elif mode == 'sum':
+            self.mode = mode
+        elif mode == 'avg':
+            self.mode = 'average_inc_pad'
 
     def getpara(self):
         return []
@@ -56,6 +62,7 @@ class Pooling(Layer):
         for i in range(2):
             remainSize[i] = (isize[i-2] + 2*self.pad[i]) // self.stride[i] \
                             - ((self.size[i] -((isize[i-2] + 2*self.pad[i]) % self.stride[i] + 0.1))//self.stride[i])
+            remainSize[i] = int(remainSize[i])
 
         return [(*prefixSize, *remainSize),]
 
