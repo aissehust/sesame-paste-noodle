@@ -40,6 +40,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
         elif layer.type == 'ReLU':
             nl = L.Relu()
             name = layer.name
+            bottom = layer.bottom
+            top = layer.top
             if bottom[0] == top[0]:
                 # if this is inplace operation, then steal bottom layer's name.
                 preConv = layerName2InstanceMap[bottom[0]]
@@ -51,17 +53,22 @@ def convert(def_path, caffemodel_path, output_path, phase):
             name = layer.name
             # 0: max, 1: average, 2: stochastic
             poolingMethod = layer.pooling_param.pool
+            if poolingMethod == 0:
+                poolingMethod = 'max'
+            elif poolingMethod == 1:
+                poolingMethod = 'avg'
             kernel_size = layer.pooling_param.kernel_size
             stride = layer.pooling_param.stride
-            nl = L.Pooling()
+            pad = layer.pooling_param.pad
+            nl = L.Pooling(dsize=(kernel_size, kernel_size), stride=(stride, stride), pad=(pad, pad), mode=poolingMethod)
             layerName2InstanceMap[name] = nl
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'LRN':
             name = layer.name
-            nl = L.LRN()
             local_size = layer.lrn_param.local_size
             alpha = layer.lrn_param.alpha
             beta = layer.lrn_param.beta
+            nl = L.LRN(local_size = local_size, alpha = alpha, beta = beta)
             layerName2InstanceMap[name] = nl
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'Concat':
@@ -71,12 +78,14 @@ def convert(def_path, caffemodel_path, output_path, phase):
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'Dropout':
             name = layer.name
-            nl = L.Dropout()
+            ratio = layer.dropout_param.dropout_ratio
+            nl = L.Dropout(p=ratio)
             layerName2InstanceMap[name] = nl
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'InnerProduct':
             name = layer.name
-            nl = L.FullConn()
+            output_feature = layer.inner_product_param.num_output
+            nl = L.FullConn(output_feature=output_feature)
             layerName2InstanceMap[name] = nl
             layerName2Bottom[name] = layer.bottom
         elif layer.type == 'Softmax':
@@ -91,7 +100,7 @@ def convert(def_path, caffemodel_path, output_path, phase):
 
     # read .caffemodel file to load real parameters.
     net_param = caffe_pb2.NetParameter()
-    with open(model_data, 'rb') as f:
+    with open(caffemodel_path, 'rb') as f:
         net_param.ParseFromString(f.read())
 
     for layer in net_param.layers:
@@ -100,8 +109,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
 
     # finally build the network.
     n = N.Network()
-    n.setInput()    
-    n.build(reload=True)
+    #n.setInput()    
+    #n.build(reload=True)
 
     return n
             
