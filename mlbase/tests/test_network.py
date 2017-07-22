@@ -113,6 +113,28 @@ def test_nextLayerDiamond():
     with pytest.raises(Exception) as e:
         next(g)
 
+        
+def test_buildForwardSize():
+    n = N.Network()
+
+    inputLayer = RawInput((1, 28, 28))
+    n.setInput(inputLayer)
+    flatten = inputLayer.followedBy(Flatten())
+    full1 = flatten.followedBy(FullConn(feature_map_multiplier=2))
+    full2 = flatten.followedBy(FullConn(feature_map_multiplier=2))
+    concat = Concat().follow(full1, full2)
+    full3 = concat.followedBy(FullConn(feature_map_multiplier=2))
+
+    n.buildForwardSize()
+    for l in n.nextLayer():
+        if l == full1:
+            assert l.w.get_value().shape == (784, 1568)
+        elif l == full2:
+            assert l.w.get_value().shape == (784, 1568)
+        elif l == full3:
+            assert l.w.get_value().shape == (3136, 6272)
+    
+
 
 def test_predictBatchSize():
     """

@@ -169,6 +169,7 @@ class Network(learner.SupervisedLearner):
         """
         Use this method to iterate over all known layers.
         This is a DAG walker.
+        Guarantee all previous layers are visited for the next visiting layer.
         """
         visitedLayer = {}
         openEndLayer = collections.deque()
@@ -203,6 +204,23 @@ class Network(learner.SupervisedLearner):
         for l in self.nextLayer():
             ret[l.name] = l
         return ret
+
+
+    def buildForwardSize(self):
+        """
+        Initialize parameter based on size info for each layer.
+        """
+        layer2OutputSizeMap = {}
+        for layer in self.nextLayer():
+            if len(layer.inputLayer) == 0:
+                layer2OutputSizeMap[layer] = layer.forwardSize([])[0]
+            else:
+                allInputSize = []
+                for il in layer.inputLayer:
+                    allInputSize.append(layer2OutputSizeMap[il])
+                layer2OutputSizeMap[layer] = layer.forwardSize(allInputSize)[0]
+        return self
+                
 
     def buildPredict(self, reload=False):
         for layer in self.nextLayer():
