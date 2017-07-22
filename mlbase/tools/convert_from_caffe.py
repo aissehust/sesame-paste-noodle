@@ -15,6 +15,7 @@ def convert(def_path, caffemodel_path, output_path, phase):
 
     layerName2InstanceMap = {} # dict of str:layer 
     layerName2Bottom = {} # dict of str:list
+    inputLayer = None
 
     for layer in params.layer:
         if layer.type == 'Input':
@@ -22,6 +23,7 @@ def convert(def_path, caffemodel_path, output_path, phase):
                              layer.input_param.shape[0].dim[2],
                              layer.input_param.shape[0].dim[3]))
             layerName2InstanceMap[layer.name] = nl
+            inputLayer = nl
         elif layer.type == 'Convolution':
             name = layer.name
             bottom = layer.bottom
@@ -98,18 +100,32 @@ def convert(def_path, caffemodel_path, output_path, phase):
             raise NotImplementedError('unknown caffe layer.')
 
 
+    # create the network        
+    n = N.Network()
+    for layer in params.layer:
+        name = layer.name
+        if name in layerName2Bottom:
+            for bottomLayer in layerName2Bottom[name]:
+                n.connect(layerName2InstanceMap[bottomLayer], layerName2InstanceMap[name], reload=True)
+
+    n.setInput(inputLayer, reload=True)
+    n.buildForwardSize()
+            
+
     # read .caffemodel file to load real parameters.
     net_param = caffe_pb2.NetParameter()
     with open(caffemodel_path, 'rb') as f:
         net_param.ParseFromString(f.read())
 
     for layer in net_param.layers:
-        pass
+        name = layer.name # str
+        ltype = layer.type # int
+        bottom = layer.bottom # RepeatedScalarContainer
+        top = layer.top # RepeatedScalarContainer
 
 
     # finally build the network.
-    n = N.Network()
-    #n.setInput()    
+
     #n.build(reload=True)
 
     return n
