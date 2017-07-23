@@ -282,8 +282,10 @@ class Network(learner.SupervisedLearner):
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
 
+
         lastTriple = buildBuffer.popitem()
-        self.outputSizeChecker = lastTriple[1][0][0]
+        if not reload:
+            self.outputSizeChecker = lastTriple[1][0][0]
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 

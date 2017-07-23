@@ -6,6 +6,7 @@ import mlbase.layers as L
 from google.protobuf import text_format
 import numpy as np
 import theano
+from mlbase.util import floatX
 
 
 def convert(def_path, caffemodel_path, output_path, phase):
@@ -170,8 +171,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
                     print(layerName2InstanceMap[lname].b.get_value().shape)
                     raise Exception('Error, b shape do not match.')
                 
-                layerName2InstanceMap[lname].w = theano.shared(w, borrow=True)
-                layerName2InstanceMap[lname].b = theano.shared(bias, borrow=True)
+                layerName2InstanceMap[lname].w = theano.shared(floatX(w), borrow=True)
+                layerName2InstanceMap[lname].b = theano.shared(floatX(bias), borrow=True)
             elif ltype == 5: # data
                 print('seen name: {}, {}'.format(lname, ltype))
             elif ltype == 18: # relu
@@ -202,8 +203,8 @@ def convert(def_path, caffemodel_path, output_path, phase):
                     print(layerName2InstanceMap[lname].b.get_value().shape)
                     raise Exception('Error, b shape do not match.')
                 
-                layerName2InstanceMap[lname].w = theano.shared(w, borrow=True)
-                layerName2InstanceMap[lname].b = theano.shared(bias, borrow=True)
+                layerName2InstanceMap[lname].w = theano.shared(floatX(w), borrow=True)
+                layerName2InstanceMap[lname].b = theano.shared(floatX(bias), borrow=True)
             elif ltype == 21: # 21 for Softmax output, 20 for softmax
                 print('seen name: {}, {}'.format(lname, ltype))
             else:
@@ -219,7 +220,7 @@ def convert(def_path, caffemodel_path, output_path, phase):
 
     # finally build the network.
 
-    #n.build(reload=True)
+    n.build(reload=True)
 
     return n
             

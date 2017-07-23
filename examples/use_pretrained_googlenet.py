@@ -22,7 +22,7 @@ import mlbase.tools.convert_from_caffe as caffe
 val_image_path = "/hdd/home/largedata/ILSVRC/ILSVRC2012_img_val.tar"
 val_label_path = "/hdd/home/yueguan/workspace/caffe/data/ilsvrc12/val.txt" # caffe label definition
 #caffe_mean_file = "/hdd/home/yueguan/workspace/caffe/data/ilsvrc12/imagenet_mean.binaryproto"
-model_def = "/hdd/home/yueguan/workspace/caffe/models/bvlc_googlenet/deploy.prototxt"
+model_def = "/hdd/home/yueguan/workspace/sesame-paste-noodle-dev/deploy.prototxt"
 model_data = "/hdd/home/yueguan/workspace/caffe/models/bvlc_googlenet/bvlc_googlenet.caffemodel"
     
 #meanImage = caffe.getMeanImage(caffe_mean_file)
@@ -53,7 +53,8 @@ print(teX.shape)
 
 net = caffe.convert(model_def, model_data, None, 'test')
 
-# net.predict(teX)
+result = net.predict(teX)
+print(result)
 #
 #print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
 
