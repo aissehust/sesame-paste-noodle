@@ -36,6 +36,10 @@ model_data = "/hdd/home/yueguan/workspace/caffe/models/bvlc_googlenet/bvlc_googl
 #              .normalize2RGB() \
 #              .write2Tmp('/hdd/home/yueguan/workspace/data/imagenet')
 
+# [Mean] values are BGR for historical reasons -- the original CaffeNet training lmdb was made with image processing by OpenCV which defaults to BGR order.]
+# !!!!!
+
+
 
 
 # replace the following the spn defined data meta info.
@@ -54,9 +58,11 @@ print(teX.shape)
 net = caffe.convert(model_def, model_data, None, 'test')
 
 result = net.predict(teX)
-print(result)
+# print(result)
 #
-#print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
+# print(1 - np.mean(np.argmax(teY, axis=1) == np.argmax(n.predict(teX), axis=1)))
+#print(np.argmax(net.predict(teX), axis=1))
 
 
-    
+
+print(np.fliplr(net.predict(teX).argsort(axis=1))[:, :10])
