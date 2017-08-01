@@ -2,7 +2,7 @@ import PIL.Image as pil_image
 import os.path
 import tarfile
 
-class Image:
+class ImageProcessor:
     def __init__(self, data_path):
         """
         Support: 
@@ -17,6 +17,8 @@ class Image:
             self.isDir = True
         elif os.path.isfile(data_path) and data_path.endswith('.tar'):
             self.isTar = True
+        else:
+            raise NotImplementedError('Unknown image files.')
 
         self.dataPath = data_path
 
@@ -83,14 +85,7 @@ class Image:
 
     def write2Tmp(self, output_path=None):
 
-        def imageNameGenerator():
-            if self.isTar:
-                f = tarfile.open(self.dataPath)
-                ntarfiles = f.getmembers()
-                for img in ntarfiles:
-                    yield(img.name, f.extractfile(img))
-
-        for (name, fh) in imageNameGenerator():
+        for (name, fh) in _imageNameGenerator():
             im = pil_image.open(fh)
             for step in self.steps:
                 im = step['op'](..., _image=im, _step=step)
@@ -99,6 +94,17 @@ class Image:
                 im.save(os.path.join(output_path, name))
             else:
                 pass
+
+    def write2Tar(self, output_path):
+        pass
+
+    def _imageNameGenerator():
+        if self.isTar:
+            f = tarfile.open(self.dataPath)
+            ntarfiles = f.getmembers()
+            for img in ntarfiles:
+                yield(img.name, f.extractfile(img))
+        
 
 class Video():
     pass

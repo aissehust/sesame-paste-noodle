@@ -306,14 +306,16 @@ class Network(learner.SupervisedLearner):
                                          outputs=currentPredictTensor[0],
                                          allow_input_downcast=True)
 
-    def train(self, X, Y):
-        for di in range(len(X.shape)):
-            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
-                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
 
-        for di in range(len(Y.shape)):
-            if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
-                raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
+    def train(self, X, Y):
+        if self.inputSizeChecker != None:
+            for di in range(len(X.shape)):
+                if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                    raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+
+            for di in range(len(Y.shape)):
+                if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
+                    raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
             
         headindex = list(range(0, len(X), self.batchsize))
         tailindex = list(range(self.batchsize, len(X), self.batchsize))
@@ -336,10 +338,12 @@ class Network(learner.SupervisedLearner):
                     os.remove(self.lastSaveAbsolutePath)
                 self.lastSaveAbsolutePath = newSavedFile
 
+
     def predict(self, X, stub=None, watcher=None):
-        for di in range(len(X.shape)):
-            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
-                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+        if self.inputSizeChecker != None:
+            for di in range(len(X.shape)):
+                if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                    raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
                     
         startIndex = 0
         retY = None
