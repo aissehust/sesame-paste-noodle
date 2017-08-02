@@ -2,18 +2,25 @@ import PIL.Image as pil_image
 import os.path
 import tarfile
 
+__all__ = [
+    "ImageProcessor",
+]
+
 class ImageProcessor:
-    def __init__(self, data_path):
+    def __init__(self, data_path=None):
         """
         Support: 
         * images files in one given directory.
         * images in one tar file.
         """
         self.steps = []
+        self.laterUse = False
         self.isDir = False
         self.isTar = False
-        
-        if os.path.isdir(data_path):
+
+        if data_path == None:
+            self.lateruse = True
+        elif os.path.isdir(data_path):
             self.isDir = True
         elif os.path.isfile(data_path) and data_path.endswith('.tar'):
             self.isTar = True

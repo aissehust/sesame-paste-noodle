@@ -4,6 +4,7 @@ from PIL import Image
 
 __all__ = [
     'BatchData',
+    'RGBImage',
     'JPGinTar',
     'JPGinFolder',
 ]
@@ -64,24 +65,80 @@ class BatchData():
         self.dataShape = shape
 
 
-class JPGinTar(BatchData):
-    pass
+class RGBImage(BatchData):
+    def __init__(self, channel_mean_map=None, channel_order=None, preprocessing=None):
+        super(RGBImage, self).__init__()
+        self.meanMap = channel_mean_map
+        self.colorOrder = channel_order
+        self.preprocessing = preprocessing
+        
+        self.index2name = {}
+        self.name2index = {}
+
+    def getBatch(self, start, stop):
+            
+        """
+        Load data, includes start, exclude end
+        """
+        if start >= stop:
+            raise NotImplementedError('Start should less than stop.')
+        
+        retIndex = 0    
+        data = np.empty((stop-start, *self.shape[1:]))
+        for img in self.loadNextImage(start, stop):
+            ia = np.asarray(img)
+            iae = np.array(ia)
+            iae = np.rollaxis(iae, 2, 0)
+            data[retIndex, ...] = iae
+            
+            retIndex += 1
+
+        print(self.meanMap)
+        if self.meanMap is not None:
+            data[:, 0, :, :] -= self.meanMap[0]
+            data[:, 1, :, :] -= self.meanMap[1]
+            data[:, 2, :, :] -= self.meanMap[2]
+        if self.colorOrder is not None:
+            cr = self.colorOrder.find('R')
+            cg = self.colorOrder.find('G')
+            cb = self.colorOrder.find('B')
+            iae1 = np.empty(data.shape)
+            iae1[:, cr, ...] = data[:, 0, ...]
+            iae1[:, cg, ...] = data[:, 1, ...]
+            iae1[:, cb, ...] = data[:, 2, ...]
+            data = iae1
+
+        return data
+
+    def getIndex2NameMap(self):
+        return self.index2name
+
+    def getName2IndexMap(self):
+        return self.name2index
+
+    # Subclass should implement this.
+    def loadNextImage(self, start, stop):
+        pass
+            
+
+class JPGinTar(RGBImage):
+    def __init__(self, tf, **kargs):
+        pass
+
+    def loadNextImage(self, start, stop):
+        pass
         
         
-class JPGinFolder(BatchData):
-    def __init__(self, folder, channel_mean_map=None, channel_order=None):
+class JPGinFolder(RGBImage):
+    def __init__(self, folder, **kargs):
         """
         folder: where to find jpgs.
         channel_mean_map: list in order of RGB.
         channel_order: a string composed of 3 capitalized chars: RGB.
         """
-        super(JPGinFolder, self).__init__()
+        super(JPGinFolder, self).__init__(**kargs)
         self.dirpath = folder
-        self.meanMap = channel_mean_map
-        self.colorOrder = channel_order
 
-        self.index2name = {}
-        self.name2index = {}
         if self.dirpath is not None:
             if os.path.isdir(self.dirpath):
                 flist = os.listdir(self.dirpath)
@@ -110,49 +167,16 @@ class JPGinFolder(BatchData):
         else:
             raise NotImplementedError('Expect a RGB image.')
         self.updateShape((batchSize, 3, height, width))
-        
 
-    def getBatch(self, start, stop):
-            
-        """
-        Load data, includes start, exclude end
-        """
-        if start >= stop:
-            raise NotImplementedError('Start should less than stop.')
-        
+    def loadNextImage(self, start, stop):
         index = start
-        retIndex = 0    
-        data = np.empty((stop-start, *self.shape[1:]))
         while index < stop:
-            fh = Image.open(os.path.join(self.dirpath, self.index2name[index]))
-            ia = np.asarray(fh)
-            iae = np.array(ia)
-            iae = np.rollaxis(iae, 2, 0)
-            data[retIndex, ...] = iae
-
-            
+            yield Image.open(os.path.join(self.dirpath, self.index2name[index]))
             index += 1
-            retIndex += 1
+        
+        
 
-        if self.meanMap is not None:
-            data[:, 0, :, :] -= self.meanMap[0]
-            data[:, 1, :, :] -= self.meanMap[1]
-            data[:, 2, :, :] -= self.meanMap[2]
-        if self.colorOrder is not None:
-            cr = self.colorOrder.find('R')
-            cg = self.colorOrder.find('G')
-            cb = self.colorOrder.find('B')
-            iae1 = np.empty(data.shape)
-            iae1[:, cr, ...] = data[:, 0, ...]
-            iae1[:, cg, ...] = data[:, 1, ...]
-            iae1[:, cb, ...] = data[:, 2, ...]
-            data = iae1
 
-        return data
 
-    def getIndex2NameMap(self):
-        return self.index2name
 
-    def getName2IndexMap(self):
-        return self.name2index
             
