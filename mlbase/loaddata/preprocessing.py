@@ -78,14 +78,22 @@ class ImageProcessor:
             self.steps.append(step)
             return self
         else:
-            if _image.mode == "L":
+            if _image.mode == "RGB":
+                _image.load()
+            elif _image.mode == "L":
                 _image = pil_image.merge("RGB", (_image, _image, _image))
                 _image.load()
+            elif _image.mode == "CMYK":
+                _image = _image.convert('RGB')
+                _image.load()
+            else:
+                raise NotImplementedError('Unknown image format. {}'.format(_image.mode))
+                
             return _image
 
     def write2Tmp(self, output_path=None):
 
-        for (name, fh) in _imageNameGenerator():
+        for (name, fh) in self._imageNameGenerator():
             im = pil_image.open(fh)
             for step in self.steps:
                 im = step['op'](..., _image=im, _step=step)
@@ -98,7 +106,7 @@ class ImageProcessor:
     def write2Tar(self, output_path):
         pass
 
-    def _imageNameGenerator():
+    def _imageNameGenerator(self):
         if self.isTar:
             f = tarfile.open(self.dataPath)
             ntarfiles = f.getmembers()

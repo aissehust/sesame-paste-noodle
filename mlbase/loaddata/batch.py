@@ -69,10 +69,16 @@ class JPGinTar(BatchData):
         
         
 class JPGinFolder(BatchData):
-    def __init__(self, folder, channel_mean_map=None):
+    def __init__(self, folder, channel_mean_map=None, channel_order=None):
+        """
+        folder: where to find jpgs.
+        channel_mean_map: list in order of RGB.
+        channel_order: a string composed of 3 capitalized chars: RGB.
+        """
         super(JPGinFolder, self).__init__()
         self.dirpath = folder
         self.meanMap = channel_mean_map
+        self.colorOrder = channel_order
 
         self.index2name = {}
         self.name2index = {}
@@ -122,12 +128,31 @@ class JPGinFolder(BatchData):
             ia = np.asarray(fh)
             iae = np.array(ia)
             iae = np.rollaxis(iae, 2, 0)
-            iae = iae/256
-
             data[retIndex, ...] = iae
+
             
             index += 1
             retIndex += 1
 
+        if self.meanMap is not None:
+            data[:, 0, :, :] -= self.meanMap[0]
+            data[:, 1, :, :] -= self.meanMap[1]
+            data[:, 2, :, :] -= self.meanMap[2]
+        if self.colorOrder is not None:
+            cr = self.colorOrder.find('R')
+            cg = self.colorOrder.find('G')
+            cb = self.colorOrder.find('B')
+            iae1 = np.empty(data.shape)
+            iae1[:, cr, ...] = data[:, 0, ...]
+            iae1[:, cg, ...] = data[:, 1, ...]
+            iae1[:, cb, ...] = data[:, 2, ...]
+            data = iae1
+
         return data
+
+    def getIndex2NameMap(self):
+        return self.index2name
+
+    def getName2IndexMap(self):
+        return self.name2index
             
