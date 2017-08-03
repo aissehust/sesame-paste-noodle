@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from PIL import Image
+import tarfile
 
 __all__ = [
     'BatchData',
@@ -122,8 +123,65 @@ class RGBImage(BatchData):
             
 
 class JPGinTar(RGBImage):
-    def __init__(self, tf, **kargs):
-        pass
+    def __init__(self, tar_file, **kargs):
+        super(JPGinTar, self).__init__(**kargs)
+        self.tarFile = tar_file
+
+
+        if self.tarFile is not  None:
+            fh = tarfile.open(self.tarFile)
+            tarFileToOpen = [fh]
+            currentFileName = ['root']
+            self.upFile = {}
+            self.upIndex = {}
+            totalIndex = 0
+
+            while len(tarFileToOpen) > 0:
+                ctar = tarFileToOpen.pop()
+                cFile = currentFileName.pop()
+                members = ctar.getmembers()
+
+                index = 0
+                print(cFile)
+                for member in members:
+                    self.upFile[member.name] = cFile
+                    self.upIndex[member.name] = index
+
+                    if member.name.endswith("JPEG") \
+                       or member.name.endswith("jpeg") \
+                       or member.name.endswith("JPG") \
+                       or member.name.endswith("jpg"):
+                        self.index2name[totalIndex] = member.name
+                        self.name2index[member.name] = totalIndex
+                        totalIndex += 1
+                    elif member.name.endswith("TAR") \
+                         or member.name.endswith("tar"):
+                        fhMember = ctar.extractfile(member)
+                        tarFileToOpen.append(tarfile.open(fileobj=fhMember))
+                        currentFileName.append(member.name)
+                    else:
+                        raise NotImplementedError('Unknown file type {}.'.format(member.name))
+                    
+                    index += 1
+                        
+        else:
+            raise ValueError('None tar file.')
+
+        batchSize = len(self.index2name)
+        self.updateLength(batchSize)
+
+
+        imgName = self.index2name[0]
+        print(imgName)
+
+        indexList = []
+        currentFileName = imgName
+        while currentFileName != 'root':
+            print(currentFileName, self.upIndex[currentFileName], self.upFile[currentFileName])
+            currentIndex = self.upIndex[currentFileName]
+            indexList.append(currentIndex)
+            currentFileName = self.upFile[currentFileName]
+        print(indexList)
 
     def loadNextImage(self, start, stop):
         pass
