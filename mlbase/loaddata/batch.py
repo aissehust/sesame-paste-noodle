@@ -189,7 +189,7 @@ class JPGinTar(RGBImage):
             members = cfh.getmembers()
             cfh = cfh.extractfile(members[cindex])
         img0 = Image.open(cfh)
-        if kargs['preprocessing'] is not None:
+        if 'preprocessing' in kargs.keys() and kargs['preprocessing'] is not None:
             img0 = kargs['preprocessing'].processImage(img0)
         img0 = np.asarray(img0)
         height = img0.shape[0]
@@ -253,7 +253,7 @@ class JPGinFolder(RGBImage):
         # the PIL reported number is in width-height order
         # theano expects height-width order
         img0 = Image.open(os.path.join(self.dirpath, self.index2name[0]))
-        if kargs['preprocessing'] is not None:
+        if 'preprocessing' in kargs.keys() and kargs['preprocessing'] is not None:
             img0 = kargs['preprocessing'].processImage(img0)
         img0 = np.asarray(img0)
         height = img0.shape[0]
