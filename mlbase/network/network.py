@@ -39,8 +39,8 @@ class Network(learner.SupervisedLearner):
     
         self.X = T.tensor4()
         self.Y = T.matrix()
-        self.inputSizeChecker = {}
-        self.outputSizeChecker = {}
+        self.inputSizeChecker = None
+        self.outputSizeChecker = None
         
         self.params = []
         self.costFunc = cost.CrossEntropy
@@ -313,6 +313,7 @@ class Network(learner.SupervisedLearner):
                 if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
                     raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
 
+        if self.outputSizeChecker != None:
             for di in range(len(Y.shape)):
                 if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
                     raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
@@ -323,8 +324,8 @@ class Network(learner.SupervisedLearner):
             tailindex = tailindex + [len(X),]
         for start, end in zip(headindex, tailindex):
             # TODO: need to fit patch size better.
-            if (end - start) < self.batchsize:
-                break
+            #if (end - start) < self.batchsize:
+            #    break
             self.learner(X[start:end], Y[start:end])
 
         # save the model sometime
