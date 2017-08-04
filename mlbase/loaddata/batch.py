@@ -87,14 +87,17 @@ class RGBImage(BatchData):
         retIndex = 0    
         data = np.empty((stop-start, *self.shape[1:]))
         for img in self.loadNextImage(start, stop):
+            if self.preprocessing is not None:
+                img = self.preprocessing.processImage(img)
+
             ia = np.asarray(img)
             iae = np.array(ia)
             iae = np.rollaxis(iae, 2, 0)
+
             data[retIndex, ...] = iae
             
             retIndex += 1
 
-        print(self.meanMap)
         if self.meanMap is not None:
             data[:, 0, :, :] -= self.meanMap[0]
             data[:, 1, :, :] -= self.meanMap[1]
@@ -118,6 +121,7 @@ class RGBImage(BatchData):
         return self.name2index
 
     # Subclass should implement this.
+    # expect a PIL.Image object.
     def loadNextImage(self, start, stop):
         pass
             
@@ -142,7 +146,6 @@ class JPGinTar(RGBImage):
                 members = ctar.getmembers()
 
                 index = 0
-                print(cFile)
                 for member in members:
                     self.upFile[member.name] = cFile
                     self.upIndex[member.name] = index
@@ -172,19 +175,51 @@ class JPGinTar(RGBImage):
 
 
         imgName = self.index2name[0]
-        print(imgName)
-
         indexList = []
         currentFileName = imgName
         while currentFileName != 'root':
-            print(currentFileName, self.upIndex[currentFileName], self.upFile[currentFileName])
             currentIndex = self.upIndex[currentFileName]
             indexList.append(currentIndex)
             currentFileName = self.upFile[currentFileName]
-        print(indexList)
+
+        cfh = open(self.tarFile, 'rb')
+        while len(indexList) > 0:
+            cfh = tarfile.open(fileobj=cfh)
+            cindex = indexList.pop()
+            members = cfh.getmembers()
+            cfh = cfh.extractfile(members[cindex])
+        img0 = Image.open(cfh)
+        if kargs['preprocessing'] is not None:
+            img0 = kargs['preprocessing'].processImage(img0)
+        img0 = np.asarray(img0)
+        height = img0.shape[0]
+        width = img0.shape[1]
+        if img0.shape[2] != 3:
+            raise ValueError('Expect a RGB image.')
+        self.updateShape((batchSize, 3, height, width))
+            
 
     def loadNextImage(self, start, stop):
-        pass
+        index = start
+        while index < stop:
+            imgName = self.index2name[index]
+            indexList = []
+            currentFileName = imgName
+            while currentFileName != 'root':
+                currentIndex = self.upIndex[currentFileName]
+                indexList.append(currentIndex)
+                currentFileName = self.upFile[currentFileName]
+
+            cfh = open(self.tarFile, 'rb')
+            while len(indexList) > 0:
+                cfh = tarfile.open(fileobj=cfh)
+                cindex = indexList.pop()
+                members = cfh.getmembers()
+                cfh = cfh.extractfile(members[cindex])
+
+            img0 = Image.open(cfh)
+            yield img0
+            index += 1
         
         
 class JPGinFolder(RGBImage):
@@ -217,13 +252,14 @@ class JPGinFolder(RGBImage):
         # the numpy array for PIL image is in height-width order
         # the PIL reported number is in width-height order
         # theano expects height-width order
-        fh = Image.open(os.path.join(self.dirpath, self.index2name[0]))
-        (width, height) = fh.size
-        channel = None
-        if fh.mode == 'RGB':
-            channel = 3
-        else:
-            raise NotImplementedError('Expect a RGB image.')
+        img0 = Image.open(os.path.join(self.dirpath, self.index2name[0]))
+        if kargs['preprocessing'] is not None:
+            img0 = kargs['preprocessing'].processImage(img0)
+        img0 = np.asarray(img0)
+        height = img0.shape[0]
+        width = img0.shape[1]
+        if img0.shape[2] != 3:
+            raise ValueError('Expect a RGB image.')
         self.updateShape((batchSize, 3, height, width))
 
     def loadNextImage(self, start, stop):

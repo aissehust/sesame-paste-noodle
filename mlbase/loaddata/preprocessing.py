@@ -1,4 +1,4 @@
-import PIL.Image as pil_image
+from PIL import Image
 import os.path
 import tarfile
 
@@ -88,7 +88,7 @@ class ImageProcessor:
             if _image.mode == "RGB":
                 _image.load()
             elif _image.mode == "L":
-                _image = pil_image.merge("RGB", (_image, _image, _image))
+                _image = Image.merge("RGB", (_image, _image, _image))
                 _image.load()
             elif _image.mode == "CMYK":
                 _image = _image.convert('RGB')
@@ -98,10 +98,21 @@ class ImageProcessor:
                 
             return _image
 
+
+    def processImage(self, img):
+        if not isinstance(img, Image.Image):
+            raise ValueError('Expect PIL.Image')
+            return
+
+        for step in self.steps:
+            img = step['op'](..., _image=img, _step=step)
+        return img
+
+
     def write2Tmp(self, output_path=None):
 
         for (name, fh) in self._imageNameGenerator():
-            im = pil_image.open(fh)
+            im = Image.open(fh)
             for step in self.steps:
                 im = step['op'](..., _image=im, _step=step)
             print("{}, {}, {}, {}".format(name, im.format, im.size, im.mode))
