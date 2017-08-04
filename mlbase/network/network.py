@@ -39,8 +39,8 @@ class Network(learner.SupervisedLearner):
     
         self.X = T.tensor4()
         self.Y = T.matrix()
-        self.inputSizeChecker = {}
-        self.outputSizeChecker = {}
+        self.inputSizeChecker = None
+        self.outputSizeChecker = None
         
         self.params = []
         self.costFunc = cost.CrossEntropy
@@ -169,6 +169,7 @@ class Network(learner.SupervisedLearner):
         """
         Use this method to iterate over all known layers.
         This is a DAG walker.
+        Guarantee all previous layers are visited for the next visiting layer.
         """
         visitedLayer = {}
         openEndLayer = collections.deque()
@@ -203,6 +204,23 @@ class Network(learner.SupervisedLearner):
         for l in self.nextLayer():
             ret[l.name] = l
         return ret
+
+
+    def buildForwardSize(self):
+        """
+        Initialize parameter based on size info for each layer.
+        """
+        layer2OutputSizeMap = {}
+        for layer in self.nextLayer():
+            if len(layer.inputLayer) == 0:
+                layer2OutputSizeMap[layer] = layer.forwardSize([])[0]
+            else:
+                allInputSize = []
+                for il in layer.inputLayer:
+                    allInputSize.append(layer2OutputSizeMap[il])
+                layer2OutputSizeMap[layer] = layer.forwardSize(allInputSize)[0]
+        return self
+                
 
     def buildPredict(self, reload=False):
         for layer in self.nextLayer():
@@ -264,8 +282,10 @@ class Network(learner.SupervisedLearner):
             for extraUpdatesPair in layer.getExtraPara(currentTensor):
                 extraUpdates.append(extraUpdatesPair)
 
+
         lastTriple = buildBuffer.popitem()
-        self.outputSizeChecker = lastTriple[1][0][0]
+        if not reload:
+            self.outputSizeChecker = lastTriple[1][0][0]
         currentTensor = lastTriple[1][1]
         currentPredictTensor = lastTriple[1][2]
                 
@@ -286,14 +306,17 @@ class Network(learner.SupervisedLearner):
                                          outputs=currentPredictTensor[0],
                                          allow_input_downcast=True)
 
-    def train(self, X, Y):
-        for di in range(len(X.shape)):
-            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
-                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
 
-        for di in range(len(Y.shape)):
-            if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
-                raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
+    def train(self, X, Y):
+        if self.inputSizeChecker != None:
+            for di in range(len(X.shape)):
+                if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                    raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+
+        if self.outputSizeChecker != None:
+            for di in range(len(Y.shape)):
+                if di != 0 and Y.shape[di] != self.outputSizeChecker[di]:
+                    raise AssertionError('Output data size is not expected. given: {}; expect: {}'.format(Y.shape, self.outputSizeChecker))
             
         headindex = list(range(0, len(X), self.batchsize))
         tailindex = list(range(self.batchsize, len(X), self.batchsize))
@@ -301,8 +324,8 @@ class Network(learner.SupervisedLearner):
             tailindex = tailindex + [len(X),]
         for start, end in zip(headindex, tailindex):
             # TODO: need to fit patch size better.
-            if (end - start) < self.batchsize:
-                break
+            #if (end - start) < self.batchsize:
+            #    break
             self.learner(X[start:end], Y[start:end])
 
         # save the model sometime
@@ -316,10 +339,12 @@ class Network(learner.SupervisedLearner):
                     os.remove(self.lastSaveAbsolutePath)
                 self.lastSaveAbsolutePath = newSavedFile
 
+
     def predict(self, X, stub=None, watcher=None):
-        for di in range(len(X.shape)):
-            if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
-                raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
+        if self.inputSizeChecker != None:
+            for di in range(len(X.shape)):
+                if di != 0 and X.shape[di] != self.inputSizeChecker[di]:
+                    raise AssertionError('Input data size is not expected. given: {}; expect: {}'.format(X.shape, self.inputSizeChecker))
                     
         startIndex = 0
         retY = None

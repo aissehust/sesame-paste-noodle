@@ -4,7 +4,7 @@ import theano.tensor as T
 import sys
 from mlbase.layers import layer
 from .conv import Conv2d
-from .bn import BatchNormalization
+from .normalization import BatchNormalization
 from .activation import Relu
 
 __all__ = [

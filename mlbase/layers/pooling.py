@@ -3,6 +3,7 @@ from .layer import layerhelper
 import theano
 import theano.tensor as T
 from theano.tensor.signal.pool import pool_2d
+import math
 
 __all__ = [
     'Pooling',
@@ -17,16 +18,37 @@ class Pooling(Layer):
     LayerTypeName = 'Pooling'
     yaml_tag = u'!Pooling'
     
-    def __init__(self, dsize=(2,2)):
+    def __init__(self, dsize=(2,2), stride=None, pad=(0,0), mode='max'):
         super(Pooling, self).__init__()
+
+        if len(dsize) != 2:
+            raise NotImplementedError('pooling 2d needs square region!')
+        
         self.size = dsize
+        if stride is None:
+            self.stride = dsize
+        else:
+            self.stride = stride
+        self.pad = pad
+            
+        if mode == 'max':
+            self.mode = mode
+        elif mode == 'sum':
+            self.mode = mode
+        elif mode == 'avg':
+            self.mode = 'average_inc_pad'
 
     def getpara(self):
         return []
 
     def forward(self, inputtensor):
         inputactivation = inputtensor[0]
-        return (pool_2d(inputactivation, self.size, ignore_border=True),)
+        return (pool_2d(inputactivation
+                        , self.size
+                        , ignore_border=True
+                        , stride=self.stride
+                        , pad=self.pad
+                        , mode=self.mode),)
 
     def forwardSize(self, inputsize):
         isize = inputsize[0]
@@ -35,7 +57,14 @@ class Pooling(Layer):
         if len(isize) != 4:
             raise IndexError
 
-        return [(isize[0], isize[1], int(isize[2]/self.size[0]), int(isize[3]/self.size[1]))]
+        prefixSize = isize[:-2]
+        remainSize = [0,0]
+        for i in range(2):
+            remainSize[i] = (isize[i-2] + 2*self.pad[i]) // self.stride[i] \
+                            - ((self.size[i] -((isize[i-2] + 2*self.pad[i]) % self.stride[i] + 0.1))//self.stride[i])
+            remainSize[i] = int(remainSize[i])
+
+        return [(*prefixSize, *remainSize),]
 
     def fillToObjMap(self):
         objDict = super(Pooling, self).fillToObjMap()

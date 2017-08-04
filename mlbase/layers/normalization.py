@@ -6,8 +6,53 @@ from .layer import layerhelper
 from ..util import floatX
 
 __all__ = [
+    'LRN',
     'BatchNormalization',
 ]
+
+@layerhelper
+class LRN(Layer):
+    """
+    This implements Caffe's' Local Response Normalization
+    described at http://caffe.berkeleyvision.org/tutorial/layers/lrn.html
+
+    Only across-channels is supported. No within-channel.
+
+    The implementation is adapted from lasagne.
+    """
+
+    debugname = 'lrn'
+    LayerTypeName = 'LRN'
+    yaml_tag = u'!LRN'
+    
+    def __init__(self, local_size=5, alpha=1, beta=5):
+        super(LRN, self).__init__()
+        
+        self.localSize = local_size
+        self.alpha = alpha
+        self.beta = beta
+
+    def getpara(self):
+        return []
+
+    def forward(self, inputtensor):
+        x = inputtensor[0]
+        input_shape = x.shape
+        ch = input_shape[1]
+        bs = input_shape[0]
+        half_n = self.localSize // 2
+        input_sqr = T.sqr(x)
+        extra_channels = T.alloc(0., bs, ch + 2*half_n, *input_shape[2:])
+        input_sqr = T.set_subtensor(extra_channels[:, half_n:half_n+ch, :, :]
+                                    , input_sqr)
+        scale = 1
+        for i in range(self.localSize):
+            scale += self.alpha/self.localSize * input_sqr[:, i:i+ch, ...]
+        scale = scale ** self.beta
+        return (x/scale, )
+
+    def forwardSize(self, inputsize):
+        return inputsize
 
 @layerhelper
 class BatchNormalization(Layer):
