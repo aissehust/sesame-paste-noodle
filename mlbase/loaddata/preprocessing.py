@@ -86,15 +86,17 @@ class ImageProcessor:
             return self
         else:
             if _image.mode == "RGB":
-                _image.load()
+                pass
             elif _image.mode == "L":
                 _image = Image.merge("RGB", (_image, _image, _image))
-                _image.load()
             elif _image.mode == "CMYK":
                 _image = _image.convert('RGB')
-                _image.load()
+            elif _image.mode == "RGBA":
+                _image = _image.convert('RGB')
             else:
                 raise NotImplementedError('Unknown image format. {}'.format(_image.mode))
+
+            _image.load()
                 
             return _image
 
